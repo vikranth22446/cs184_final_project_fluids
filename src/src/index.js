@@ -1,10 +1,13 @@
 import * as THREE from 'three'
 import ReactDOM from 'react-dom'
-import React, { useRef, useMemo, useState, Suspense } from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import React, { useRef, useMemo, useState, Suspense, useEffect } from 'react'
+import { Canvas, useFrame, useThree,addTail } from '@react-three/fiber'
+import StatsImpl from "stats.js"
 import { Environment, ContactShadows } from '@react-three/drei'
 import { EffectComposer, SSAO } from '@react-three/postprocessing'
 import './styles.css'
+import { Physics, useBox, useSphere, usePlane } from '@react-three/cannon'
+import throttle from "lodash/throttle"
 
 function w_poly(r, h) {
     if(r > h || r < 0 ) return 0;
@@ -137,6 +140,7 @@ function compute_surface_tension(particle, particles) {
     f_t_z = sigma * c_z * k;
     return new THREE.Vector3(f_t_x, f_t_y, f_t_z)
 }
+
 function vvadd(v1, v2) {
   return new THREE.Vector3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z)
 }
@@ -156,15 +160,15 @@ function Swarm({ count, ...props }) {
   const mesh = useRef()
   const [dummy] = useState(() => new THREE.Object3D())
   var plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-  const viewport = useThree((state) => state.viewport) 
+  const { viewport } = useThree();
   const particles = useMemo(() => {
     const temp = []
     for (let i = 0; i < count; i++) {
       const t = Math.random() * 100
 
-      const xFactor = 0 + (Math.random()-.5) * 8
-      const yFactor = 0 + (Math.random()-.5) * 2
-      const zFactor = 0 + (Math.random()-.5) * 2
+      const xFactor = 0 + (Math.random()-.5) * 4
+      const yFactor = -1 + (Math.random()-.5) * 1
+      const zFactor = 0 + (Math.random()-.5) * 1
       const pos = new THREE.Vector3(xFactor, yFactor, zFactor)
       const force = new THREE.Vector3(0, 0.0, 0);
       // Note using implicit euler over verlet because it is more physically accurate
@@ -198,15 +202,15 @@ function Swarm({ count, ...props }) {
         particle.t = t + 1
         const particle_mass = 1 * particle.density
         // t = particle.t += speed / 2
-        const delta_t = 1/60*30
+        const delta_t = 1/60 * 8
         const net_force = vvadd_multiple([particle.pressure_force, particle.viscosity_force, particle.gravity_force, particle.surface_tension])
         const next_acc = vmuls(net_force, 1/particle_mass * delta_t * delta_t)
         var new_vel = vvadd(vel, vmuls(next_acc, delta_t))
         var new_pos = vvadd(pos, vmuls(new_vel, delta_t))
         
         // if it hits the bounding box, comes back with opposite velocity
-        if(new_pos.y < -2) {
-          new_pos.y = -2
+        if(new_pos.y < -viewport.height / 2 + 1) {
+          new_pos.y = -viewport.height / 2 + 1
           new_vel.y *= -1
         }
         if(new_pos.y > 2) {
@@ -245,15 +249,106 @@ function Swarm({ count, ...props }) {
       })
     mesh.current.instanceMatrix.needsUpdate = true
   })
-
+  const uniforms = {
+    k_a: { value: new THREE.Vector3(0.9, 0.5, 0.3) },
+    k_d: { value: new THREE.Vector3(0.9, 0.5, 0.3) },
+    k_s: { value: new THREE.Vector3(0.8, 0.8, 0.8) },
+    I_a: {value: new THREE.Vector3(1.0, 1.0, 1.0) },
+    LightIntensity: { value: new THREE.Vector4(0.5, 0.5, 0.5, 1.0) },
+    LightPosition: { value: new THREE.Vector4(0.0, 2000.0, 0.0, 1.0) },
+    p: {value: 100.0}
+  };
+  const vertexShader = `
+  varying vec3 Normal;
+  varying vec3 Position;
+  void main() {
+    Normal = normalize(normalMatrix * normal);
+    Position = vec3(modelViewMatrix * vec4(position, 1.0));
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+  `;
+  const defaultAttributeValues = {
+      'color': [ 1, 1, 1 ],
+      'uv': [ 0, 0 ],
+      'uv2': [ 0, 0 ]
+  }
+  const fragmentShader = `
+  varying vec3 Normal;
+  varying vec3 Position;
+  uniform vec3 k_a;
+  uniform vec3 k_s;
+  uniform float p;
+  uniform vec3 k_d;
+  uniform vec3 I_a;
+  uniform vec4 LightPosition;
+  uniform vec3 LightIntensity;
+  vec3 bp_shading() {
+  vec3 n = normalize(Normal);
+  vec3 s = normalize(vec3(LightPosition) - Position);
+  vec3 v = normalize(vec3(-Position));
+  vec3 h = normalize(s) + normalize(v);
+    return LightIntensity * (k_a + k_s * pow(max(dot(h, n),0.0), p) + k_d * max(dot(s, Normal), 0.0 ));
+}
+void main() {
+  gl_FragColor = vec4(bp_shading(), 1.0);
+}
+  `;
   return (
     <instancedMesh ref={mesh} args={[null, null, count]}>
         <sphereBufferGeometry args={[.1, 5, 5]}/>
         <meshStandardMaterial roughness={0} color="royalblue" />
+        {/* <shaderMaterial
+        name="material"
+        uniforms={uniforms}
+        vertexShader={vertexShader}
+        fragmentShader={fragmentShader}
+        defaultAttributeValues={defaultAttributeValues}
+      /> */}
     </instancedMesh>
   )
 }
 
+
+function Stats() {
+  const [stats] = useState(() => new StatsImpl())
+  useEffect(() => {
+    stats.showPanel(0)
+    document.body.appendChild(stats.dom)
+    return () => document.body.removeChild(stats.dom)
+  }, [])
+  return useFrame(state => {
+    stats.begin()
+    state.gl.render(state.scene, state.camera)
+    stats.end()
+  }, 1)
+}
+
+// A physical plane without visual representation
+function Plane({ color, ...props }) {
+  usePlane(() => ({ ...props }));
+  return null;
+}
+function Borders() {
+  const { viewport } = useThree();
+  return (
+    <>
+      <Plane
+        position={[0, -viewport.height / 2, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+      />
+      <Plane
+        position={[-viewport.width / 2 - 1, 0, 0]}
+        rotation={[0, Math.PI / 2, 0]}
+      />
+      <Plane
+        position={[viewport.width / 2 + 1, 0, 0]}
+        rotation={[0, -Math.PI / 2, 0]}
+      />
+      <Plane position={[0, 0, 0]} rotation={[0, 0, 0]} />
+      <Plane position={[0, 0, 12]} rotation={[0, -Math.PI, 0]} />
+    </>
+  );
+}
 
 function RotatingBox() {
     const myMesh = React.useRef();
@@ -273,15 +368,65 @@ function RotatingBox() {
         } else {
             myMesh.current.position.y -= 0.01
         }
-    });
-
+    });  
+    const uniforms = {
+      k_a: { value: new THREE.Vector3(0.9, 0.5, 0.3) },
+      k_d: { value: new THREE.Vector3(0.9, 0.5, 0.3) },
+      k_s: { value: new THREE.Vector3(0.8, 0.8, 0.8) },
+      I_a: {value: new THREE.Vector3(1.0, 1.0, 1.0) },
+      LightIntensity: { value: new THREE.Vector4(0.5, 0.5, 0.5, 1.0) },
+      LightPosition: { value: new THREE.Vector4(0.0, 2000.0, 0.0, 1.0) },
+      p: {value: 100.0}
+    };
+    const vertexShader = `
+    varying vec3 Normal;
+    varying vec3 Position;
+    void main() {
+      Normal = normalize(normalMatrix * normal);
+      Position = vec3(modelViewMatrix * vec4(position, 1.0));
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+    `;
+    const defaultAttributeValues = {
+      	'color': [ 1, 1, 1 ],
+      	'uv': [ 0, 0 ],
+      	'uv2': [ 0, 0 ]
+    }
+    const fragmentShader = `
+    varying vec3 Normal;
+    varying vec3 Position;
+    uniform vec3 k_a;
+    uniform vec3 k_s;
+    uniform float p;
+    uniform vec3 k_d;
+    uniform vec3 I_a;
+    uniform vec4 LightPosition;
+    uniform vec3 LightIntensity;
+    vec3 bp_shading() {
+    vec3 n = normalize(Normal);
+    vec3 s = normalize(vec3(LightPosition) - Position);
+    vec3 v = normalize(vec3(-Position));
+    vec3 h = normalize(s) + normalize(v);
+      return LightIntensity * (k_a + k_s * pow(max(dot(h, n),0.0), p) + k_d * max(dot(s, Normal), 0.0 ));
+  }
+  void main() {
+    gl_FragColor = vec4(bp_shading(), 1.0);
+  }
+    `;
     return <mesh
       scale={active ? 1.5 : 1}
       onClick={() => setActive(!active)}
       ref={myMesh}
     >
       <sphereBufferGeometry />
-      <meshPhongMaterial color="royalblue" />
+      {/* <meshPhongMaterial color="royalblue" /> */}
+      <shaderMaterial
+        name="material"
+        uniforms={uniforms}
+        vertexShader={vertexShader}
+        fragmentShader={fragmentShader}
+        defaultAttributeValues={defaultAttributeValues}
+      />
     </mesh>
 }
 
@@ -289,7 +434,7 @@ function App() {
   return (
     <>
       <Canvas >
-        <color attach="background" args={['#f0f0f0']} />
+        <color attach="background" args={['#f0f0f0']} powerPreference={"high-performance"}/>
         <ambientLight intensity={0.5} />
 
         <directionalLight/>
@@ -301,7 +446,12 @@ function App() {
         {/* <Suspense fallback={null}>
           <Environment preset="city" /> 
         </Suspense>  */}
-        <Swarm count={1000}/>
+        <Physics>
+          <Borders></Borders>
+          <Swarm count={1000}/>
+        </Physics>
+        <Stats />
+        {/* <RotatingBox></RotatingBox> */}
         {/* <Swarm /> */}
       </Canvas>
     </>
