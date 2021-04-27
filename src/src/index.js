@@ -179,12 +179,10 @@ function Material() {
       */
       // Reference: https://observablehq.com/@camargo/three-js-utah-teapot-with-a-custom-phong-shader-material
       uniforms: {
-          k_a: { value: new THREE.Vector3(0.9, 0.5, 0.3) },
-          k_d: { value: new THREE.Vector3(0.9, 0.5, 0.3) },
-          k_s: { value: new THREE.Vector3(0.8, 0.8, 0.8) },
-          I_a: {value: new THREE.Vector3(1.0, 1.0, 1.0) },
-          LightIntensity: { value: new THREE.Vector4(0.5, 0.5, 0.5, 1.0) },
-          LightPosition: { value: new THREE.Vector4(0.0, 2000.0, 0.0, 1.0) },
+          k_a: {value: 0.1},
+          k_d: {value: 1.0},
+          k_s: {value: 0.5},
+          I_a: {value: new THREE.Vector3(1.0, 1.0, 1.0)},
           p: {value: 100.0}
       },
       defaultAttributeValues : {
@@ -228,7 +226,7 @@ function Material() {
       }
       `
   });
-  return <shaderMaterial name="material" uniforms={material.uniforms} vertexShader={material.vertexShader} fragmentShader={material.fragmentShader}/>
+  return material;
 }
 
 function Swarm({ count, ...props }) {
@@ -324,7 +322,6 @@ function Swarm({ count, ...props }) {
       })
     mesh.current.instanceMatrix.needsUpdate = true
   })
-<<<<<<< HEAD
   const uniforms = {
     k_a: { value: new THREE.Vector3(0.9, 0.5, 0.3) },
     k_d: { value: new THREE.Vector3(0.9, 0.5, 0.3) },
@@ -372,7 +369,6 @@ void main() {
   return (
     <instancedMesh ref={mesh} args={[null, null, count]}>
         <sphereBufferGeometry args={[.1, 5, 5]}/>
-<<<<<<< HEAD
         <meshStandardMaterial roughness={0} color="royalblue" />
         {/* <shaderMaterial
         name="material"
@@ -381,77 +377,8 @@ void main() {
         fragmentShader={fragmentShader}
         defaultAttributeValues={defaultAttributeValues}
       /> */}
-=======
-        //<meshStandardMaterial roughness={0} color="royalblue" />
-
->>>>>>> 6cb52e4... Debugging
-=======
-  const geometry = new THREE.SphereBufferGeometry(.1, 5, 5)
-  const blinn_material = Material()
-
-  return (
-    <instancedMesh ref={mesh} args={[null, null, count]}>
-        <sphereBufferGeometry attach="" args={[.1, 5, 5]}/>
-        //<meshStandardMaterial roughness={0} color="royalblue" />
-        <Material/>
->>>>>>> d980cac... Debugging
     </instancedMesh>
   )
-}
-
-<<<<<<< HEAD
-fucntion material() {
-  const material = new THREE.ShaderMaterial({
-      // Choose values for these (copy-pasted from project 4 part 5)
-      /*
-        float k_a = 0.1;
-        float k_s = 0.5;
-        float p = 100.0;
-        float k_d = 1.0;
-        vec3 I_a = vec3(1.0, 1.0, 1.0);
-
-        vec3 l = normalize(u_light_pos - vec3(v_position));
-        vec3 n = normalize(vec3(v_normal));
-        vec3 v = normalize(u_cam_pos - vec3(v_position));
-        vec3 h = normalize(l + v);
-
-        vec3 diffuse = max(dot(n, l), 0.0) * k_d * normalize(u_light_intensity);
-        float angle = max(dot(h, n), 0.0);
-        vec3 spec = pow(angle, p) * k_s * normalize(u_light_intensity);
-
-        out_color = vec4(((k_a * I_a) + diffuse + spec) * vec3(u_color), 1.0);
-      */
-      // Reference: https://observablehq.com/@camargo/three-js-utah-teapot-with-a-custom-phong-shader-material
-      uniform_values: {
-          k_a: {value: 0.1},
-          k_d: {value: 1.0},
-          k_s: {value: 0.5},
-          I_a: {value: new THREE.Vector3(1.0, 1.0, 1.0)},
-          p: {value: 100.0}
-      },
-      vertex_shader: `
-        varying vec3 Normal;
-        varying vec3 Position;
-
-        void main() {
-          Normal = normalize(normalMatrix * normal);
-          Position = vec3(modelViewMatrix * vec4(position, 1.0));
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragment_shader: `
-        varying vec3 Normal;
-        varying vec3 Position;
-
-        uniform float k_a;
-        uniform float k_s;
-        uniform float p;
-        uniform float k_d;
-        uniform vec3 I_a;
-
-      `
-  });
-  return material;
 }
 
 function Stats() {
@@ -495,8 +422,6 @@ function Borders() {
   );
 }
 
-=======
->>>>>>> 8748a2e... Blinn-Phong logic done. Attempting to update instacedMesh
 function RotatingBox() {
     const myMesh = React.useRef();
     const [active, setActive] = useState(false);
