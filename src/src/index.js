@@ -152,7 +152,7 @@ function dist(pos1, pos2) {
   return Math.sqrt(Math.pow((pos1.x - pos2.x), 2) + Math.pow((pos1.y - pos2.y), 2) + Math.pow((pos1.z - pos2.z), 2))
 }
 
-function material() {
+function Material() {
   const material = new THREE.ShaderMaterial({
       // Choose values for these (copy-pasted from project 4 part 5)
       /*
@@ -205,7 +205,21 @@ function material() {
         uniform float p;
         uniform float k_d;
         uniform vec3 I_a;
+        uniform vec4 LightPosition;
+        uniform vec3 LightIntensity;
 
+        vec3 bp_shading() {
+        vec3 n = normalize(Normal);
+        vec3 s = normalize(vec3(LightPosition) - Position);
+        vec3 v = normalize(vec3(-Position));
+        vec3 h = reflect(v + s);
+
+        return LightIntensity * (k_a + k_d * max(dot(s, Normal), 0.0 ) + k_s * pow(max(dot(h, n),0.0), p) ));
+      }
+
+      void main() {
+        gl_FragColor = vec4(bp_shading(), 1.0);
+      }       
       `
   });
   return material;
@@ -309,8 +323,9 @@ function Swarm({ count, ...props }) {
 
   return (
     <instancedMesh ref={mesh} args={[null, null, count]}>
-        //<sphereBufferGeometry args={[.1, 5, 5]}/>
+        <sphereBufferGeometry args={[.1, 5, 5]}/>
         //<meshStandardMaterial roughness={0} color="royalblue" />
+
     </instancedMesh>
   )
 }
