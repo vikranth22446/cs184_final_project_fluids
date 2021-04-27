@@ -175,10 +175,12 @@ function Material() {
       */
       // Reference: https://observablehq.com/@camargo/three-js-utah-teapot-with-a-custom-phong-shader-material
       uniforms: {
-          k_a: {value: 0.1},
-          k_d: {value: 1.0},
-          k_s: {value: 0.5},
-          I_a: {value: new THREE.Vector3(1.0, 1.0, 1.0)},
+          k_a: { value: new THREE.Vector3(0.9, 0.5, 0.3) },
+          k_d: { value: new THREE.Vector3(0.9, 0.5, 0.3) },
+          k_s: { value: new THREE.Vector3(0.8, 0.8, 0.8) },
+          I_a: {value: new THREE.Vector3(1.0, 1.0, 1.0) },
+          LightIntensity: { value: new THREE.Vector4(0.5, 0.5, 0.5, 1.0) },
+          LightPosition: { value: new THREE.Vector4(0.0, 2000.0, 0.0, 1.0) },
           p: {value: 100.0}
       },
       defaultAttributeValues : {
@@ -219,10 +221,10 @@ function Material() {
 
       void main() {
         gl_FragColor = vec4(bp_shading(), 1.0);
-      }       
+      }
       `
   });
-  return material;
+  return <shaderMaterial name="material" uniforms={material.uniforms} vertexShader={material.vertexShader} fragmentShader={material.fragmentShader}/>
 }
 
 function Swarm({ count, ...props }) {
@@ -319,13 +321,13 @@ function Swarm({ count, ...props }) {
     mesh.current.instanceMatrix.needsUpdate = true
   })
   const geometry = new THREE.SphereBufferGeometry(.1, 5, 5)
-  const blinn_material = material()
+  const blinn_material = Material()
 
   return (
     <instancedMesh ref={mesh} args={[null, null, count]}>
-        <sphereBufferGeometry args={[.1, 5, 5]}/>
+        <sphereBufferGeometry attach="" args={[.1, 5, 5]}/>
         //<meshStandardMaterial roughness={0} color="royalblue" />
-
+        <Material/>
     </instancedMesh>
   )
 }
