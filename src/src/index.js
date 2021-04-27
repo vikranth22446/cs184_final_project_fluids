@@ -179,10 +179,12 @@ function Material() {
       */
       // Reference: https://observablehq.com/@camargo/three-js-utah-teapot-with-a-custom-phong-shader-material
       uniforms: {
-          k_a: {value: 0.1},
-          k_d: {value: 1.0},
-          k_s: {value: 0.5},
-          I_a: {value: new THREE.Vector3(1.0, 1.0, 1.0)},
+          k_a: { value: new THREE.Vector3(0.9, 0.5, 0.3) },
+          k_d: { value: new THREE.Vector3(0.9, 0.5, 0.3) },
+          k_s: { value: new THREE.Vector3(0.8, 0.8, 0.8) },
+          I_a: {value: new THREE.Vector3(1.0, 1.0, 1.0) },
+          LightIntensity: { value: new THREE.Vector4(0.5, 0.5, 0.5, 1.0) },
+          LightPosition: { value: new THREE.Vector4(0.0, 2000.0, 0.0, 1.0) },
           p: {value: 100.0}
       },
       defaultAttributeValues : {
@@ -226,14 +228,22 @@ function Material() {
       }
       `
   });
+<<<<<<< HEAD
   return material;
+=======
+  return <shaderMaterial name="material" uniforms={material.uniforms} vertexShader={material.vertexShader} fragmentShader={material.fragmentShader}/>
+>>>>>>> d980cac0c40084e534b873558850cc453e8e0513
 }
 
 function Swarm({ count, ...props }) {
   const mesh = useRef()
   const [dummy] = useState(() => new THREE.Object3D())
   var plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+<<<<<<< HEAD
   const { viewport } = useThree();
+=======
+  const viewport = useThree((state) => state.viewport)
+>>>>>>> d980cac0c40084e534b873558850cc453e8e0513
   const particles = useMemo(() => {
     const temp = []
     for (let i = 0; i < count; i++) {
@@ -322,6 +332,7 @@ function Swarm({ count, ...props }) {
       })
     mesh.current.instanceMatrix.needsUpdate = true
   })
+<<<<<<< HEAD
   const uniforms = {
     k_a: { value: new THREE.Vector3(0.9, 0.5, 0.3) },
     k_d: { value: new THREE.Vector3(0.9, 0.5, 0.3) },
@@ -377,10 +388,21 @@ void main() {
         fragmentShader={fragmentShader}
         defaultAttributeValues={defaultAttributeValues}
       /> */}
+=======
+  const geometry = new THREE.SphereBufferGeometry(.1, 5, 5)
+  const blinn_material = Material()
+
+  return (
+    <instancedMesh ref={mesh} args={[null, null, count]}>
+        <sphereBufferGeometry attach="" args={[.1, 5, 5]}/>
+        //<meshStandardMaterial roughness={0} color="royalblue" />
+        <Material/>
+>>>>>>> d980cac0c40084e534b873558850cc453e8e0513
     </instancedMesh>
   )
 }
 
+<<<<<<< HEAD
 function Stats() {
   const [stats] = useState(() => new StatsImpl())
   useEffect(() => {
@@ -422,6 +444,8 @@ function Borders() {
   );
 }
 
+=======
+>>>>>>> d980cac0c40084e534b873558850cc453e8e0513
 function RotatingBox() {
     const myMesh = React.useRef();
     const [active, setActive] = useState(false);
