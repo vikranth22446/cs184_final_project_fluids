@@ -8,6 +8,7 @@ import { EffectComposer, SSAO } from '@react-three/postprocessing'
 import './styles.css'
 import { Physics, useBox, useSphere, usePlane } from '@react-three/cannon'
 import throttle from "lodash/throttle"
+import { useAsBind } from "use-as-bind";
 
 function w_poly(r, h) {
     if(r > h || r < 0 ) return 0;
@@ -82,6 +83,7 @@ function compute_pressure(particle, particles) {
 
     return new THREE.Vector3(f_p_x, f_p_y, f_p_z)
 }
+
 function compute_viscosity(particle, particles) {
     var f_v_x = 0.0;
     var f_v_y = 0.0;
@@ -151,7 +153,6 @@ function vvadd_multiple(vect) {
   return vect.reduce((acc, item, index) => vvadd(acc, item))
 }
 
-
 function dist(pos1, pos2) {
   return Math.sqrt(Math.pow((pos1.x - pos2.x), 2) + Math.pow((pos1.y - pos2.y), 2) + Math.pow((pos1.z - pos2.z), 2))
 }
@@ -159,6 +160,8 @@ function dist(pos1, pos2) {
 function Swarm({ count, ...props }) {
   const mesh = useRef()
   const [dummy] = useState(() => new THREE.Object3D())
+  // const { loaded, instance, error } = useAsBind("./hello.wasm");
+
   var plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   const { viewport } = useThree();
   const particles = useMemo(() => {
@@ -173,7 +176,7 @@ function Swarm({ count, ...props }) {
       const force = new THREE.Vector3(0, 0.0, 0);
       // Note using implicit euler over verlet because it is more physically accurate
       const vel = new THREE.Vector3(0.0,0)
-      const mass = .01;
+      const mass = 1;
       temp.push({ t, pos:pos, force:force, mass:mass, vel: vel})
     }
     return temp
@@ -185,16 +188,10 @@ function Swarm({ count, ...props }) {
     });
     particles.forEach((particle, i) => {
         particle.pressure_force = compute_pressure(particle, particles)
-    });
-    particles.forEach((particle, i) => {
         particle.viscosity_force = compute_viscosity(particle, particles)
-    });
-    particles.forEach((particle, i) => {
-      particle.gravity_force = compute_gravity(particle, particles)
-    });
-    particles.forEach((particle, i) => {
-      particle.surface_tension = compute_surface_tension(particle, particles)
-    });
+        particle.gravity_force = compute_gravity(particle, particles)
+        particle.surface_tension = compute_surface_tension(particle, particles)
+      });
 
 
     particles.forEach((particle, i) => {
@@ -202,15 +199,15 @@ function Swarm({ count, ...props }) {
         particle.t = t + 1
         const particle_mass = 1 * particle.density
         // t = particle.t += speed / 2
-        const delta_t = 1/60 * 8
+        const delta_t = 1/60 * 20
         const net_force = vvadd_multiple([particle.pressure_force, particle.viscosity_force, particle.gravity_force, particle.surface_tension])
         const next_acc = vmuls(net_force, 1/particle_mass * delta_t * delta_t)
         var new_vel = vvadd(vel, vmuls(next_acc, delta_t))
         var new_pos = vvadd(pos, vmuls(new_vel, delta_t))
         
         // if it hits the bounding box, comes back with opposite velocity
-        if(new_pos.y < -viewport.height / 2 + 1) {
-          new_pos.y = -viewport.height / 2 + 1
+        if(new_pos.y < -2) {
+          new_pos.y = -2
           new_vel.y *= -1
         }
         if(new_pos.y > 2) {
@@ -448,7 +445,7 @@ function App() {
         </Suspense>  */}
         <Physics>
           <Borders></Borders>
-          <Swarm count={1000}/>
+          <Swarm count={300}/>
         </Physics>
         <Stats />
         {/* <RotatingBox></RotatingBox> */}
