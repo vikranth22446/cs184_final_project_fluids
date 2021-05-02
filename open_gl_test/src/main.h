@@ -1,6 +1,7 @@
 // // Include standard headers
 #ifndef MAIN_H
 #define MAIN_H
+
 #include <iostream>
 #include <fstream>
 #include <nanogui/nanogui.h> // already includes  #include <GL/glew.h>
@@ -20,6 +21,5 @@ typedef uint32_t gid_t;
 
 using namespace std;
 using namespace nanogui;
-
 
 #endif

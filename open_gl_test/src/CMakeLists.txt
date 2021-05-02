@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 3.2)
 set(FLUIDSIM_VIEWER_SOURCE
     main.cpp
     shaders.cpp
+    particlesim.cpp
+    controls.cpp
 )
 
 #-------------------------------------------------------------------------------
