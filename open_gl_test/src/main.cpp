@@ -13,6 +13,7 @@ GLFWwindow* window;
 #include <glm/glm.hpp>
 using namespace glm;
 
+
 int main( void )
 {
 	// Initialise GLFW
@@ -39,13 +40,15 @@ int main( void )
 	}
 	glfwMakeContextCurrent(window);
 
-	// Initialize GLEW
+	//Initialize GLEW
+	#ifndef __APPLE__
 	if (glewInit() != GLEW_OK) {
 		fprintf(stderr, "Failed to initialize GLEW\n");
 		getchar();
 		glfwTerminate();
 		return -1;
 	}
+	#endif
 
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
