@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.2)
 # Cloth simulation source
 set(FLUIDSIM_VIEWER_SOURCE
     main.cpp
+    shaders.cpp
 )
 
 #-------------------------------------------------------------------------------
