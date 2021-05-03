@@ -9,9 +9,8 @@ layout(location = 2) in vec4 color; // Position of the center of the particule a
 out vec4 particlecolor;
 
 // Values that stay constant for the whole mesh.
-uniform vec3 CameraRight_worldspace;
-uniform vec3 CameraUp_worldspace;
-uniform mat4 VP; // Model-View-Projection matrix, but without the Model (the position is in BillboardPos; the orientation depends on the camera)
+uniform mat4 u_model;
+uniform mat4 u_view_projection; // Model-View-Projection matrix, but without the Model (the position is in BillboardPos; the orientation depends on the camera)
 
 void main()
 {	
@@ -19,7 +18,7 @@ void main()
 	vec3 vertex_shifted_by_center = (centers.xyz + vertex);
 
 	// Output position of the vertex
-	gl_Position = VP * vec4(vertex_shifted_by_center, 1.0f);
+	gl_Position = u_view_projection * vec4(vertex_shifted_by_center, 1.0f);
 
 	// UV of the vertex. No special space for this one.
 	particlecolor = color;

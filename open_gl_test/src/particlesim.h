@@ -1,5 +1,6 @@
 #include "main.h"
 #include "particle.h"
+#include "camera.h"
 
 #ifndef PARTICLE_SIM_H
 #define PARTICLE_SIM_H
@@ -42,6 +43,23 @@ public:
  GLuint ViewProjMatrixID;
  GLFWwindow *window;
 
+// camera controls
+
+  fluid_camera::Camera camera;
+  fluid_camera::Camera canonicalCamera;
+
+  double view_distance;
+  double canonical_view_distance;
+  double min_view_distance;
+  double max_view_distance;
+
+  double scroll_rate;
+  virtual void resetCamera();
+  virtual glm::mat4  getProjectionMatrix();
+  virtual glm::mat4 getViewMatrix();
+
+  virtual Matrix4f  getProjectionMatrix4f();
+  virtual Matrix4f getViewMatrix4f();
  private:
   virtual void initGUI(Screen *screen);
   void load_shaders();
@@ -57,8 +75,6 @@ public:
 
   int frames_per_sec = 90;
   int simulation_steps = 30;
-
-  double scroll_rate;
 
   // Screen methods
 

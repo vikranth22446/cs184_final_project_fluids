@@ -2,7 +2,6 @@
 #include "shader.h"
 #include "particle.h"
 #include "particlesim.h"
-#include "controls.hpp"
 
 ParticleSim *app = nullptr;
 GLFWwindow *window = nullptr;
@@ -173,7 +172,5 @@ int main(void)
 
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
-	delete app;
-
 	return 0;
 }

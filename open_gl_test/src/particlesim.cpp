@@ -1,6 +1,8 @@
 #include "particlesim.h"
 #include "shader.h"
 #include "controls.hpp"
+#include "utils/misc.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 ParticleSim::ParticleSim(Screen *screen, GLFWwindow *window, int max_particles)
 {
@@ -12,6 +14,7 @@ ParticleSim::ParticleSim(Screen *screen, GLFWwindow *window, int max_particles)
   this->max_particles = max_particles;
   this->particlesContainer = new Particle[this->max_particles];
 }
+
 ParticleSim::~ParticleSim()
 {
   delete[] this->particlesContainer;
@@ -31,7 +34,6 @@ void createSphere(std::vector<GLuint> &indices, std::vector<float> positions, GL
   int stacks = 20;
   int slices = 20;
   const float radius = .1;
-  const float PI = 3.14f;
 
   // loop through stacks.
   for (int i = 0; i <= stacks; ++i)
@@ -119,7 +121,9 @@ void ParticleSim::init()
   glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
   // Initialize with empty (NULL) buffer : it will be updated later, each frame.
   glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
+  glm::vec3 avg_pm_position(0, 0, 0);
 
+  float max_width = 0.0, max_height = 0.0;
   for (int i = 0; i < MaxParticles; i++)
   {
     int particleIndex = i;
@@ -129,7 +133,43 @@ void ParticleSim::init()
     this->particlesContainer[particleIndex].blue = 0.0;
     this->particlesContainer[particleIndex].alpha = 1.0;
     this->particlesContainer[particleIndex].size = .2;
+    avg_pm_position += this->particlesContainer[particleIndex].pos;
+    max_width = max(max_width, this->particlesContainer[particleIndex].pos[0]);
+    max_height = max(max_height, this->particlesContainer[particleIndex].pos[1]);
   }
+  avg_pm_position = avg_pm_position * (float)(1.0 / MaxParticles);
+
+  fluid_camera::CameraInfo camera_info;
+  camera_info.hFov = 80;
+  camera_info.vFov = 80;
+  camera_info.nClip = 0.00001;
+  camera_info.fClip = 1000;
+
+  glm::vec3 target = glm::vec3(avg_pm_position.x, avg_pm_position.y / 2,
+                               avg_pm_position.z);
+
+  glm::vec3 c_dir = glm::vec3(0., 0., 0.);
+
+  canonical_view_distance = max(max_width, max_height) * 0.9;
+  // canonical_view_distance = max(900, 800) * 0.9;
+  scroll_rate = canonical_view_distance / 10;
+
+  view_distance = canonical_view_distance * 2;
+  min_view_distance = canonical_view_distance / 10.0;
+  max_view_distance = canonical_view_distance * 20.0;
+
+  // canonicalCamera is a copy used for view resets
+
+  camera.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z), view_distance,
+               min_view_distance, max_view_distance);
+  canonicalCamera.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z),
+                        view_distance, min_view_distance, max_view_distance);
+
+  screen_w = default_window_size(0);
+  screen_h = default_window_size(1);
+
+  camera.configure(camera_info, screen_w, screen_h);
+  canonicalCamera.configure(camera_info, screen_w, screen_h);
 }
 
 bool ParticleSim::isAlive() { return is_alive; }
@@ -142,11 +182,14 @@ void ParticleSim::drawContents()
 {
   glEnable(GL_DEPTH_TEST);
 
-  computeMatricesFromInputs(window);
-  glm::mat4 ProjectionMatrix = getProjectionMatrix();
-  glm::mat4 ViewMatrix = getViewMatrix();
-  glm::vec3 CameraPosition(glm::inverse(ViewMatrix)[3]);
-  glm::mat4 ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+  glm::mat4 model = glm::mat4x4(1.0);
+  // glm::mat4 view = this->getViewMatrix();
+  // glm::mat4 projection = this->getProjectionMatrix();
+  // glm::mat4 viewProjection = projection * view;
+
+  Matrix4f view4f = this->getViewMatrix4f();
+  Matrix4f projection4f = this->getProjectionMatrix4f();
+  Matrix4f viewProjection4f = projection4f * view4f;
 
   // Simulate all particles
   for (int i = 0; i < this->max_particles; i++)
@@ -182,11 +225,19 @@ void ParticleSim::drawContents()
   // Use our shader
   glUseProgram(programID);
 
-  // Same as the billboards tutorial
-  glUniform3f(CameraRight_worldspace_ID, ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0]);
-  glUniform3f(CameraUp_worldspace_ID, ViewMatrix[0][1], ViewMatrix[1][1], ViewMatrix[2][1]);
+  GLint u_model = glGetUniformLocation(programID, "u_model");
+  glUniformMatrix4fv(u_model, 1, GL_FALSE, &model[0][0]);
 
-  glUniformMatrix4fv(ViewProjMatrixID, 1, GL_FALSE, &ViewProjectionMatrix[0][0]);
+  GLint u_view_projection = glGetUniformLocation(programID, "u_view_projection");
+  // glUniformMatrix4fv(u_view_projection, 1, GL_FALSE, &viewProjection[0][0]);
+  // glUniformMatrix4fv(u_view_projection, 1, GL_FALSE, &viewProjection[0][0]);
+  glUniformMatrix4fv(u_view_projection, 1, GL_FALSE, viewProjection4f.template cast<float>().data());
+
+  // Same as the billboards tutorial
+  // glUniform3f(CameraRight_worldspace_ID, ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0]);
+  // glUniform3f(CameraUp_worldspace_ID, ViewMatrix[0][1], ViewMatrix[1][1], ViewMatrix[2][1]);
+
+  // glUniformMatrix4fv(ViewProjMatrixID, 1, GL_FALSE, &ViewProjectionMatrix[0][0]);
 
   // 1rst attribute buffer : vertices
   glEnableVertexAttribArray(0);
@@ -248,30 +299,112 @@ void ParticleSim::drawContents()
   glDisableVertexAttribArray(1);
   glDisableVertexAttribArray(2);
 }
-
+// ----------------------------------------------------------------------------
+// CAMERA CALCULATIONS
 //
-// CAMERA CONTROLS
-//
+// OpenGL 3.1 deprecated the fixed pipeline, so we lose a lot of useful OpenGL
+// functions that have to be recreated here.
+// ----------------------------------------------------------------------------
 
-bool ParticleSim::cursorPosCallbackEvent(double x, double y)
+void ParticleSim::resetCamera() { camera.copy_placement(canonicalCamera); }
+Matrix4f ParticleSim::getProjectionMatrix4f() {
+  Matrix4f perspective;
+  perspective.setZero();
+
+  double cam_near = camera.near_clip();
+  double cam_far = camera.far_clip();
+
+  double theta = camera.v_fov() * PI / 360;
+  double range = cam_far - cam_near;
+  double invtan = 1. / tanf(theta);
+
+  perspective(0, 0) = invtan / camera.aspect_ratio();
+  perspective(1, 1) = invtan;
+  perspective(2, 2) = -(cam_near + cam_far) / range;
+  perspective(3, 2) = -1;
+  perspective(2, 3) = -2 * cam_near * cam_far / range;
+  perspective(3, 3) = 0;
+
+  return perspective;
+}
+Matrix4f ParticleSim::getViewMatrix4f() {
+   Matrix4f lookAt;
+  Matrix3f R;
+
+  lookAt.setZero();
+
+  // Convert CGL vectors to Eigen vectors
+  // TODO: Find a better way to do this!
+
+  glm::vec3 c_pos = camera.position();
+  glm::vec3 c_udir = camera.up_dir();
+  glm::vec3 c_target = camera.view_point();
+
+  Vector3f eye(c_pos.x, c_pos.y, c_pos.z);
+  Vector3f up(c_udir.x, c_udir.y, c_udir.z);
+  Vector3f target(c_target.x, c_target.y, c_target.z);
+
+  R.col(2) = (eye - target).normalized();
+  R.col(0) = up.cross(R.col(2)).normalized();
+  R.col(1) = R.col(2).cross(R.col(0));
+
+  lookAt.topLeftCorner<3, 3>() = R.transpose();
+  lookAt.topRightCorner<3, 1>() = -R.transpose() * eye;
+  lookAt(3, 3) = 1.0f;
+
+  return lookAt;
+}
+
+glm::mat4 ParticleSim::getProjectionMatrix()
 {
-  if (left_down && !middle_down && !right_down)
-  {
-    if (ctrl_down)
-    {
+  float cam_near = camera.near_clip();
+  float cam_far = camera.far_clip();
+  float aspect_ration = camera.aspect_ratio();
+  return glm::perspective(glm::radians(camera.v_fov()), 4.0f / 3.0f, 0.1f, 100.0f);
+}
+
+glm::mat4 ParticleSim::getViewMatrix()
+{
+  float horizontalAngle = 3.14f;
+  float verticalAngle = 0.0f;
+  glm::vec3 position = glm::vec3(0, 1, 5);
+  // Direction : Spherical coordinates to Cartesian coordinates conversion
+  glm::vec3 direction(
+      cos(verticalAngle) * sin(horizontalAngle),
+      sin(verticalAngle),
+      cos(verticalAngle) * cos(horizontalAngle));
+
+  // Right vector
+  glm::vec3 right = glm::vec3(
+      sin(horizontalAngle - 3.14f / 2.0f),
+      0,
+      cos(horizontalAngle - 3.14f / 2.0f));
+
+  glm::vec3 up = glm::cross(right, direction);
+
+  glm::mat4 lookAtglm = glm::lookAt(
+      position,             // Camera is here
+      position + direction, // and looks here : at the same position, plus "direction"
+      up                    // Head is up (set to 0,-1,0 to look upside-down)
+  );
+
+  return lookAtglm;
+}
+
+// ----------------------------------------------------------------------------
+// EVENT HANDLING
+// ----------------------------------------------------------------------------
+
+bool ParticleSim::cursorPosCallbackEvent(double x, double y) {
+  if (left_down && !middle_down && !right_down) {
+    if (ctrl_down) {
       mouseRightDragged(x, y);
-    }
-    else
-    {
+    } else {
       mouseLeftDragged(x, y);
     }
-  }
-  else if (!left_down && !middle_down && right_down)
-  {
+  } else if (!left_down && !middle_down && right_down) {
     mouseRightDragged(x, y);
-  }
-  else if (!left_down && !middle_down && !right_down)
-  {
+  } else if (!left_down && !middle_down && !right_down) {
     mouseMoved(x, y);
   }
 
@@ -282,13 +415,10 @@ bool ParticleSim::cursorPosCallbackEvent(double x, double y)
 }
 
 bool ParticleSim::mouseButtonCallbackEvent(int button, int action,
-                                           int modifiers)
-{
-  switch (action)
-  {
+                                              int modifiers) {
+  switch (action) {
   case GLFW_PRESS:
-    switch (button)
-    {
+    switch (button) {
     case GLFW_MOUSE_BUTTON_LEFT:
       left_down = true;
       break;
@@ -302,8 +432,7 @@ bool ParticleSim::mouseButtonCallbackEvent(int button, int action,
     return true;
 
   case GLFW_RELEASE:
-    switch (button)
-    {
+    switch (button) {
     case GLFW_MOUSE_BUTTON_LEFT:
       left_down = false;
       break;
@@ -322,37 +451,32 @@ bool ParticleSim::mouseButtonCallbackEvent(int button, int action,
 
 void ParticleSim::mouseMoved(double x, double y) { y = screen_h - y; }
 
-void ParticleSim::mouseLeftDragged(double x, double y)
-{
+void ParticleSim::mouseLeftDragged(double x, double y) {
   float dx = x - mouse_x;
   float dy = y - mouse_y;
 
-  //   camera.rotate_by(-dy * (PI / screen_h), -dx * (PI / screen_w));
+  camera.rotate_by(-dy * (PI / screen_h), -dx * (PI / screen_w));
 }
 
-void ParticleSim::mouseRightDragged(double x, double y)
-{
-  //   camera.move_by(mouse_x - x, y - mouse_y, canonical_view_distance);
+void ParticleSim::mouseRightDragged(double x, double y) {
+  camera.move_by(mouse_x - x, y - mouse_y, canonical_view_distance);
 }
 
 bool ParticleSim::keyCallbackEvent(int key, int scancode, int action,
-                                   int mods)
-{
+                                      int mods) {
   ctrl_down = (bool)(mods & GLFW_MOD_CONTROL);
 
-  if (action == GLFW_PRESS)
-  {
-    switch (key)
-    {
+  if (action == GLFW_PRESS) {
+    switch (key) {
     case GLFW_KEY_ESCAPE:
       is_alive = false;
       break;
     case 'r':
     case 'R':
-      //   cloth->reset();
+      // cloth->reset();
       break;
     case ' ':
-      //   resetCamera();
+      resetCamera();
       break;
     case 'p':
     case 'P':
@@ -360,8 +484,7 @@ bool ParticleSim::keyCallbackEvent(int key, int scancode, int action,
       break;
     case 'n':
     case 'N':
-      if (is_paused)
-      {
+      if (is_paused) {
         is_paused = false;
         drawContents();
         is_paused = true;
@@ -373,22 +496,19 @@ bool ParticleSim::keyCallbackEvent(int key, int scancode, int action,
   return true;
 }
 
-bool ParticleSim::dropCallbackEvent(int count, const char **filenames)
-{
+bool ParticleSim::dropCallbackEvent(int count, const char **filenames) {
   return true;
 }
 
-bool ParticleSim::scrollCallbackEvent(double x, double y)
-{
-  //   camera.move_forward(y * scroll_rate);
+bool ParticleSim::scrollCallbackEvent(double x, double y) {
+  camera.move_forward(y * scroll_rate);
   return true;
 }
 
-bool ParticleSim::resizeCallbackEvent(int width, int height)
-{
+bool ParticleSim::resizeCallbackEvent(int width, int height) {
   screen_w = width;
   screen_h = height;
 
-  //   camera.set_screen_size(screen_w, screen_h);
+  camera.set_screen_size(screen_w, screen_h);
   return true;
 }
