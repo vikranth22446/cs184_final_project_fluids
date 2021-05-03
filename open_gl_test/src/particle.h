@@ -12,5 +12,10 @@ struct Particle {
     float density, mass; 
     float red, green, blue, alpha;
     float size;
+
+    glm::vec3 pressure_force;
+    glm::vec3 external;
+    glm::vec3 viscosity;
+    glm::vec3 surface_tension;
 };
 #endif /* PARTICLES_H */

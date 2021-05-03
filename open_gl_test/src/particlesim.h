@@ -111,9 +111,6 @@ public:
 
   Vector2i default_window_size = Vector2i(1024, 800);
 
-
-
-
   Particle *particlesContainer;
 };
 

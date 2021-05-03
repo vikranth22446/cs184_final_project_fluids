@@ -3,6 +3,7 @@
 #include "utils/misc.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include "glm/gtc/type_ptr.hpp" // import to get value ptr
+#include "physics.h"
 
 ParticleSim::ParticleSim(Screen *screen, GLFWwindow *window, int max_particles)
 {
@@ -147,11 +148,15 @@ void ParticleSim::init()
   glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
   glm::vec3 avg_pm_position(0, 0, 0);
 
+  // https://scicomp.stackexchange.com/questions/14450/how-to-get-proper-parameters-of-sph-simulation
   float max_width = 0.0, max_height = 0.0;
   for (int i = 0; i < MaxParticles; i++)
   {
     int particleIndex = i;
-    this->particlesContainer[particleIndex].pos = glm::vec3(((float)(rand() - RAND_MAX / 2) / RAND_MAX) * 40, ((float)(rand() - RAND_MAX / 2) / RAND_MAX) * 40, ((float)(rand() - RAND_MAX / 2) / RAND_MAX) * 40);
+    this->particlesContainer[particleIndex].pos = glm::vec3(((float)(rand() - RAND_MAX / 2) / RAND_MAX) * 1, ((float)(rand() - RAND_MAX / 2) / RAND_MAX) * 1, ((float)(rand() - RAND_MAX / 2) / RAND_MAX) * 1);
+    this->particlesContainer[particleIndex].vel = glm::vec3(0.0f);
+    this->particlesContainer[particleIndex].mass = 0.08373333333333335;
+    
     this->particlesContainer[particleIndex].red = 1.0;
     this->particlesContainer[particleIndex].green = 0.0;
     this->particlesContainer[particleIndex].blue = 0.0;
@@ -161,6 +166,7 @@ void ParticleSim::init()
     max_width = max(max_width, this->particlesContainer[particleIndex].pos[0]);
     max_height = max(max_height, this->particlesContainer[particleIndex].pos[1]);
   }
+
   avg_pm_position = avg_pm_position * (float)(1.0 / MaxParticles);
 
   fluid_camera::CameraInfo camera_info;
@@ -204,6 +210,8 @@ void ParticleSim::initGUI(Screen *screen)
 
 void ParticleSim::drawContents()
 {
+  updatePosition(this->max_particles, this->particlesContainer);
+
   glEnable(GL_DEPTH_TEST);
 
   glm::mat4 model = glm::mat4x4(1.0);

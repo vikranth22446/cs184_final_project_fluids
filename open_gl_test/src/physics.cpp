@@ -1,6 +1,7 @@
 #include "math.h"
 #include "particle.h"
-
+#include "physics.h"
+#include <iostream>
 
 float dist(glm::vec3 pos1, glm::vec3 pos2) {
   return sqrt(pow((pos1.x - pos2.x), 2) + pow((pos1.y - pos2.y), 2) + pow((pos1.z - pos2.z), 2));
@@ -42,28 +43,27 @@ float w_spiky_derivative(float r, float h) {
 }
 
 float density_s(Particle *particle, int max_particles, Particle particlesContainer[] ) {
-    const int h = 1; 
+    const float h = 1.0f; 
     float p = 0; 
     for (size_t i = 0; i < max_particles; i++) {
         Particle *other_particle = &particlesContainer[i];
         int r = dist(other_particle->pos, particle->pos); 
         p += other_particle->mass * w_poly(r, h); 
     }
-    
     particle->density = p; 
     return p; 
 }
 
 glm::vec3 compute_pressure(Particle *particle, int max_particles, Particle particlesContainer[] ) {
     glm::vec3 f_p = glm::vec3(0.0, 0.0, 0.0);
-    const int k = 1, h = 1, rho_zero = 1; 
-    const int pi = k * (particle->density - rho_zero); 
+    const float k = 1, h = 1, rho_zero = 1; 
+    const float pi = k * (particle->density - rho_zero); 
 
     for (size_t i = 0; i < max_particles; i++) {
         Particle *other_particle = &particlesContainer[i];
-        const int pj = k * (other_particle->density - rho_zero); 
-        const int r = dist(other_particle->pos, particle->pos); 
-        const int pressure = -other_particle->mass*(pi + pj)/(2*other_particle->density) * w_spiky_derivative(r, h); 
+        const float pj = k * (other_particle->density - rho_zero); 
+        const float r = dist(other_particle->pos, particle->pos); 
+        const float pressure = -other_particle->mass*(pi + pj)/(2*other_particle->density) * w_spiky_derivative(r, h); 
         if (r != 0) {
             const glm::vec3 n = (particle->pos - other_particle->pos) * (float)(1.0/r); 
             f_p += n * (float)pressure; 
@@ -74,22 +74,22 @@ glm::vec3 compute_pressure(Particle *particle, int max_particles, Particle parti
 
 glm::vec3 compute_viscosity(Particle *particle, int max_particles, Particle particlesContainer[]) {
     glm::vec3 f_v = glm::vec3(0.0, 0.0, 0.0); 
-    const int h = 1;
+    const float h = 1;
     const float mu =  0.01; // viscosity of water at 20 degrees
     
     for (size_t i = 0; i < max_particles; i++) {
         Particle *other_particle = &particlesContainer[i];
         const float r = dist(other_particle->pos, particle->pos); 
-        glm::vec3 viscosity = -other_particle->mass*(other_particle->vel- particle->vel)/other_particle->density * laplace_viscosity(r, h); 
+        glm::vec3 viscosity = -other_particle->mass*(other_particle->vel - particle->vel)/other_particle->density * laplace_viscosity(r, h); 
         f_v += viscosity;
     }
     f_v *= mu;
     return f_v;
 }
 
-glm::vec3 compute_gravity(Particle particle) {
-    const int volume = 1;
-    const float mass = particle.density * volume; 
+glm::vec3 compute_gravity(Particle *particle) {
+    const float volume = 1;
+    const float mass = particle->density * volume; 
     return glm::vec3(0.0, -9.8 * mass, 0.0); 
 }
 
@@ -99,7 +99,7 @@ glm::vec3 compute_surface_tension(Particle *particle, int max_particles, Particl
     float k = 0.0;
 
     // https://www.engineeringtoolbox.com/surface-tension-d_962.html
-    const float sigma = 0.0728 / 10; // signam surface tension of water N/m at 20 degrees
+    const float sigma = 0.0728 ; // signam surface tension of water N/m at 20 degrees
     const float h = 1.0;
     for (size_t i = 0; i < max_particles; i++) {
         Particle *other_particle = &particlesContainer[i];
@@ -117,3 +117,80 @@ glm::vec3 compute_surface_tension(Particle *particle, int max_particles, Particl
 }
 
 
+void updatePosition(int max_particles, Particle particlesContainer[]) {
+    const float delta_t = 1.0/60.0;
+    // Overall density might be constant but the density per particle is actually different
+    for(int i = 0; i < max_particles; i++) {
+        density_s(&particlesContainer[i], max_particles, particlesContainer);
+    }
+
+    // force calculation
+    for(int i = 0; i < max_particles; i++) {
+        glm::vec3 pressure_force = compute_pressure(&particlesContainer[i], max_particles, particlesContainer);
+        particlesContainer[i].pressure_force = pressure_force;
+    }
+
+    for(int i = 0; i < max_particles; i++) {
+        glm::vec3 gravity_force = compute_gravity(&particlesContainer[i]);
+        particlesContainer[i].external = gravity_force;
+    }
+
+    for(int i = 0; i < max_particles; i++) {
+        glm::vec3 surface_tension_force = compute_surface_tension(&particlesContainer[i], max_particles, particlesContainer);
+        particlesContainer[i].surface_tension = surface_tension_force;
+    }
+
+    for(int i = 0; i < max_particles; i++) {
+        glm::vec3 viscosity_force = compute_viscosity(&particlesContainer[i], max_particles, particlesContainer);
+        particlesContainer[i].viscosity = viscosity_force;
+    }
+
+    // Actually updating the points
+    
+    for(int i = 0; i < max_particles; i++) {
+        Particle *particle = &particlesContainer[i];
+        glm::vec3 net_force = particle->pressure_force + particle->external + particle->external + particle->viscosity;
+        
+        const float volume = 1;
+        const float mass = particle->density * volume; 
+        
+        // Implicit Euler to compute next time step first
+        glm::vec3 new_vel = particle->vel + net_force/mass * delta_t;
+        glm::vec3 new_pos = particle->pos + new_vel * delta_t;
+        // printf("Netforce %f, %f,%f\n", (net_force/mass * delta_t).x,  (net_force/mass * delta_t).y,  (net_force/mass).z);
+
+        particlesContainer[i].vel = new_vel;
+        particlesContainer[i].pos = new_pos;
+
+        if(particle->pos.x < -1) {
+            particle->pos.x = -1.0f;
+            particle->vel.x *= -1*.5;
+        } 
+        if(particle->pos.x > 1) {
+            particle->pos.x = 1.0f;
+            particle->vel.x *= -1*.5;
+        } 
+        if(particle->pos.y < -1) {
+            particle->pos.y = -1.0f;
+            particle->vel.y *= -1*.5;
+        }
+        if(particle->pos.y > 1) {
+            particle->pos.y = 1.0f;
+            particle->vel.y *= -1*.5;
+        } 
+        if(particle->pos.z < -1) {
+            particle->pos.z = -1.0f;
+            particle->vel.z *= -1*.5;
+        }
+        if(particle->pos.z > 1) {
+            particle->pos.z = 1.0f;
+            particle->vel.z *= -1*.5;
+        }
+
+        // const net_force = vvadd_multiple([particle.pressure_force, particle.viscosity_force, particle.gravity_force, particle.surface_tension])
+        // const next_acc = vmuls(net_force, 1/particle_mass * delta_t * delta_t)
+        // var new_vel = vvadd(vel, vmuls(next_acc, delta_t))
+        // var new_pos = vvadd(pos, vmuls(new_vel, delta_t))
+        
+    }
+}

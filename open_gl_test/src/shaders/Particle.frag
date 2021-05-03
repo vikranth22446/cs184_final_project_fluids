@@ -31,7 +31,8 @@ void main(){
   // out_color = L_d * (vec4(1, 1, 1, 0) + v_normal) / 2;
   // out_color.a = 1;
 
-  color = v_normal;
-//   color = L_d;
-//   color.a = 1;
+  // color = v_normal;
+  // color = L_d;
+  // color.a = 1;
+  color = L_d + vec4(0.0, 0.0, .2f, 1.0f);
 }

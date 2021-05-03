@@ -123,7 +123,7 @@ int main(void)
 	glfwSetErrorCallback(error_callback);
 	createGLContexts();
 	// Call this after all the widgets have been defined
-	app = new ParticleSim(screen, window, 100000);
+	app = new ParticleSim(screen, window, 1000);
 
 	screen->setVisible(true);
 	screen->performLayout();
