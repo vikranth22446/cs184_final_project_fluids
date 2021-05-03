@@ -224,6 +224,7 @@ void ParticleSim::drawContents()
   Matrix4f viewProjection4f = projection4f * view4f;
 
   // Simulate all particles
+  #pragma omp parallel for
   for (int i = 0; i < this->max_particles; i++)
   {
     Particle &p = this->particlesContainer[i]; // shortcut

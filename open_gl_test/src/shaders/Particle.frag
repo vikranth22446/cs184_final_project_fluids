@@ -18,7 +18,7 @@ out vec4 color;
 
 void main(){
   // YOUR CODE HERE
-  vec4 u_light_pos4 = vec4(u_light_pos  * 2, 1.0);
+  vec4 u_light_pos4 = vec4(u_light_pos, 1.0);
   vec4 u_light_intensity4 = vec4(u_light_intensity, 1.0);
 
   float r = length(u_light_pos4 - v_position);
@@ -32,7 +32,7 @@ void main(){
   // out_color.a = 1;
 
   // color = v_normal;
-  // color = L_d;
-  // color.a = 1;
-  color = L_d + vec4(0.0, 0.0, .2f, 1.0f);
+  color = L_d+ vec4(0.0, 0.0, .2f, 1.0f);
+  color.a = 1;
+  // color = L_d + vec4(0.0, 0.0, .2f, 1.0f);
 }

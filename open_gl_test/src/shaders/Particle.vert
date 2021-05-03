@@ -35,7 +35,7 @@ void main()
 	// lightpos_out = u_light_pos;
 	// normal_out = in_normal;
 	v_position = vec4(vertex_shifted_by_center, 1.0f);
-	v_normal = vec4(in_normal, 1.0f); // directions have 0 at the last coord
+	v_normal = vec4(in_normal, 0.0f); // directions have 0 at the last coord
 
 	// particlecolor = vec4(u_cam_pos, 1.0f);
 }

@@ -120,33 +120,37 @@ glm::vec3 compute_surface_tension(Particle *particle, int max_particles, Particl
 void updatePosition(int max_particles, Particle particlesContainer[]) {
     const float delta_t = 1.0/60.0;
     // Overall density might be constant but the density per particle is actually different
+    #pragma omp parallel for
     for(int i = 0; i < max_particles; i++) {
         density_s(&particlesContainer[i], max_particles, particlesContainer);
     }
 
     // force calculation
+    #pragma omp parallel for
     for(int i = 0; i < max_particles; i++) {
         glm::vec3 pressure_force = compute_pressure(&particlesContainer[i], max_particles, particlesContainer);
         particlesContainer[i].pressure_force = pressure_force;
     }
-
+    
+    #pragma omp parallel for
     for(int i = 0; i < max_particles; i++) {
         glm::vec3 gravity_force = compute_gravity(&particlesContainer[i]);
         particlesContainer[i].external = gravity_force;
     }
-
+    #pragma omp parallel for
     for(int i = 0; i < max_particles; i++) {
         glm::vec3 surface_tension_force = compute_surface_tension(&particlesContainer[i], max_particles, particlesContainer);
         particlesContainer[i].surface_tension = surface_tension_force;
     }
 
+    #pragma omp parallel for
     for(int i = 0; i < max_particles; i++) {
         glm::vec3 viscosity_force = compute_viscosity(&particlesContainer[i], max_particles, particlesContainer);
         particlesContainer[i].viscosity = viscosity_force;
     }
 
     // Actually updating the points
-    
+    #pragma omp parallel for
     for(int i = 0; i < max_particles; i++) {
         Particle *particle = &particlesContainer[i];
         glm::vec3 net_force = particle->pressure_force + particle->external + particle->external + particle->viscosity;
@@ -164,23 +168,23 @@ void updatePosition(int max_particles, Particle particlesContainer[]) {
 
         if(particle->pos.x < -1) {
             particle->pos.x = -1.0f;
-            particle->vel.x *= -1*.5;
+            particle->vel.x *= -1*.8;
         } 
         if(particle->pos.x > 1) {
             particle->pos.x = 1.0f;
-            particle->vel.x *= -1*.5;
+            particle->vel.x *= -1*.8;
         } 
         if(particle->pos.y < -1) {
             particle->pos.y = -1.0f;
-            particle->vel.y *= -1*.5;
+            particle->vel.y *= -1*.8;
         }
         if(particle->pos.y > 1) {
             particle->pos.y = 1.0f;
-            particle->vel.y *= -1*.5;
+            particle->vel.y *= -1*.8;
         } 
         if(particle->pos.z < -1) {
             particle->pos.z = -1.0f;
-            particle->vel.z *= -1*.5;
+            particle->vel.z *= -1*.8;
         }
         if(particle->pos.z > 1) {
             particle->pos.z = 1.0f;
