@@ -6,6 +6,7 @@ set(FLUIDSIM_VIEWER_SOURCE
     shaders.cpp
     particlesim.cpp
     camera.cpp
+    physics.cpp
 )
 
 #-------------------------------------------------------------------------------

@@ -1,6 +1,5 @@
 #include "particlesim.h"
 #include "shader.h"
-#include "controls.hpp"
 #include "utils/misc.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include "glm/gtc/type_ptr.hpp" // import to get value ptr
