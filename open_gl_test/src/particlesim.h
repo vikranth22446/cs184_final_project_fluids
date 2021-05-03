@@ -1,4 +1,6 @@
 #include "main.h"
+#include "particle.h"
+
 #ifndef PARTICLE_SIM_H
 #define PARTICLE_SIM_H
 
@@ -7,7 +9,7 @@
 
 class ParticleSim {
 public:
-  ParticleSim(nanogui::Screen *screen);
+  ParticleSim(nanogui::Screen *screen, int max_particles);
   ~ParticleSim();
 
   void init();
@@ -23,8 +25,26 @@ public:
   virtual bool dropCallbackEvent(int count, const char **filenames);
   virtual bool scrollCallbackEvent(double x, double y);
   virtual bool resizeCallbackEvent(int width, int height);
+ 
+ // Rendering helpers
+  int max_particles;
+  GLuint spherePositionVbo;
+  GLuint sphereIndexVbo;
+  std::vector<GLuint> indices;
+  std::vector<float> positions;
 
-private:
+ GLfloat* g_particule_position_size_data;
+ GLfloat* g_particule_color_data;
+ GLuint particles_position_buffer;
+ GLuint particles_color_buffer;
+
+ GLuint VertexArrayID;
+ GLuint programID; // reference to shader
+ GLuint CameraRight_worldspace_ID;
+ GLuint CameraUp_worldspace_ID;
+ GLuint ViewProjMatrixID;
+
+ private:
   virtual void initGUI(Screen *screen);
   void load_shaders();
   void load_textures();
@@ -74,6 +94,11 @@ private:
   bool is_alive = true;
 
   Vector2i default_window_size = Vector2i(1024, 800);
+
+
+
+
+  Particle *particlesContainer;
 };
 
 
