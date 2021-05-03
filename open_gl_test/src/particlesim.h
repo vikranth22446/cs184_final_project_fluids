@@ -24,11 +24,11 @@ public:
   virtual bool resizeCallbackEvent(int width, int height);
  
  // Rendering helpers
-  int max_particles;
-  GLuint spherePositionVbo;
-  GLuint sphereIndexVbo;
-  std::vector<GLuint> indices;
-  std::vector<float> positions;
+ int max_particles;
+ GLuint spherePositionVbo;
+ GLuint sphereIndexVbo;
+ std::vector<GLuint> indices;
+ std::vector<float> positions;
 
  GLfloat* g_particule_position_size_data;
  GLfloat* g_particule_color_data;
