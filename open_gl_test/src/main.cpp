@@ -137,6 +137,7 @@ int main(void)
 
 	// Dark blue background
 	glClearColor(background.x, background.y, background.b, background.a);
+	
 	// fps counter logic https://www.opengl-tutorial.org/miscellaneous/an-fps-counter/
 	int nbFrames = 0;
 	double lastTime = glfwGetTime();

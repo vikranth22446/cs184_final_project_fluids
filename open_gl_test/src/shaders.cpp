@@ -1,3 +1,5 @@
+// from open gl tutorials
+
 #include "main.h"
 #include "shader.h"
 
