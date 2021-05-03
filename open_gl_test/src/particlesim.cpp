@@ -151,7 +151,7 @@ void ParticleSim::init()
   for (int i = 0; i < MaxParticles; i++)
   {
     int particleIndex = i;
-    this->particlesContainer[particleIndex].pos = glm::vec3(((float)(rand() - RAND_MAX / 2) / RAND_MAX) * 40, ((float)(rand() - RAND_MAX / 2) / RAND_MAX) * 40, -20.0f);
+    this->particlesContainer[particleIndex].pos = glm::vec3(((float)(rand() - RAND_MAX / 2) / RAND_MAX) * 40, ((float)(rand() - RAND_MAX / 2) / RAND_MAX) * 40, ((float)(rand() - RAND_MAX / 2) / RAND_MAX) * 40);
     this->particlesContainer[particleIndex].red = 1.0;
     this->particlesContainer[particleIndex].green = 0.0;
     this->particlesContainer[particleIndex].blue = 0.0;

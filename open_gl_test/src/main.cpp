@@ -37,7 +37,7 @@ void createGLContexts()
 	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
 	// Create a GLFWwindow object
-	window = glfwCreateWindow(800, 800, "Cloth Simulator", nullptr, nullptr);
+	window = glfwCreateWindow(800, 800, "Fluid Simulation", nullptr, nullptr);
 	if (window == nullptr)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -123,7 +123,7 @@ int main(void)
 	glfwSetErrorCallback(error_callback);
 	createGLContexts();
 	// Call this after all the widgets have been defined
-	app = new ParticleSim(screen, window, 1000);
+	app = new ParticleSim(screen, window, 100000);
 
 	screen->setVisible(true);
 	screen->performLayout();
@@ -131,10 +131,12 @@ int main(void)
 
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+	glm::vec4 grayBackround = glm::vec4(.25f);
+	glm::vec4 whiteBackground = glm::vec4(1.0f);
+	glm::vec4 background = whiteBackground;
 
 	// Dark blue background
-	glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
-
+	glClearColor(background.x, background.y, background.b, background.a);
 	// fps counter logic https://www.opengl-tutorial.org/miscellaneous/an-fps-counter/
 	int nbFrames = 0;
 	double lastTime = glfwGetTime();
@@ -148,7 +150,7 @@ int main(void)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
-		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+		glClearColor(background.x, background.y, background.b, background.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		app->drawContents();

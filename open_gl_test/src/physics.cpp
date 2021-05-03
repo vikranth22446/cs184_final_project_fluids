@@ -76,6 +76,7 @@ glm::vec3 compute_viscosity(Particle *particle, int max_particles, Particle part
     glm::vec3 f_v = glm::vec3(0.0, 0.0, 0.0); 
     const int h = 1;
     const float mu =  0.01; // viscosity of water at 20 degrees
+    
     for (size_t i = 0; i < max_particles; i++) {
         Particle *other_particle = &particlesContainer[i];
         const float r = dist(other_particle->pos, particle->pos); 
