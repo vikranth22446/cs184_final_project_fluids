@@ -9,6 +9,7 @@ struct Particles {
 struct Particle {
     glm::vec3 pos;
     glm::vec3 vel;
+    float density, mass; 
     float red, green, blue, alpha;
     float size;
 };
