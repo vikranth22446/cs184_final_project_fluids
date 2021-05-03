@@ -166,9 +166,12 @@ int main(void)
 			nbFrames = 0;
 			lastFPSTime += 1.0;
 		}
+		
+		if (!app->isAlive()) {
+			glfwSetWindowShouldClose(window, 1);
+		}
 	} // Check if the ESC key was pressed or the window was closed
-	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-		   glfwWindowShouldClose(window) == 0);
+	while (glfwWindowShouldClose(window) == 0);
 
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();

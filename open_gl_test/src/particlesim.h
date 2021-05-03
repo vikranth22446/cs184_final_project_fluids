@@ -28,8 +28,10 @@ public:
  int max_particles;
  GLuint spherePositionVbo;
  GLuint sphereIndexVbo;
+ GLuint sphereNormalVbo;
  std::vector<GLuint> indices;
  std::vector<float> positions;
+ std::vector<float> normals;
 
  GLfloat* g_particule_position_size_data;
  GLfloat* g_particule_color_data;

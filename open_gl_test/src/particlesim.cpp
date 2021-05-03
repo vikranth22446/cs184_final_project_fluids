@@ -30,7 +30,14 @@ ParticleSim::~ParticleSim()
 }
 
 // https://www.songho.ca/opengl/gl_sphere.html
-void createSphere(std::vector<GLuint> &indices, std::vector<float> positions, GLuint &spherePositionVbo, GLuint &sphereIndexVbo)
+void createSphere(
+  std::vector<float> &positions,
+  std::vector<GLuint> &indices, 
+  std::vector<float> &normals,
+  GLuint &spherePositionVbo, 
+  GLuint &sphereIndexVbo,
+  GLuint &sphereNormalVbo
+  )
 {
   int stacks = 20;
   int slices = 20;
@@ -58,6 +65,13 @@ void createSphere(std::vector<GLuint> &indices, std::vector<float> positions, GL
       positions.push_back(x);
       positions.push_back(y);
       positions.push_back(z);
+
+      // TODO: idk if this actually how normals work, but it seems to work. Need to check over this sometime
+      glm::vec3 v = glm::vec3(x, y, z);
+      glm::vec3 n = glm::normalize(v);
+      normals.push_back(n[0]);
+      normals.push_back(n[1]);
+      normals.push_back(n[2]);
     }
   }
 
@@ -81,6 +95,10 @@ void createSphere(std::vector<GLuint> &indices, std::vector<float> positions, GL
   glGenBuffers(1, &sphereIndexVbo);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereIndexVbo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), indices.data(), GL_STATIC_DRAW);
+
+  glGenBuffers(1, &sphereNormalVbo);
+  glBindBuffer(GL_ARRAY_BUFFER, sphereNormalVbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * normals.size(), normals.data(), GL_STATIC_DRAW);
 
   // sphereIndexCount = indices.size();
 }
@@ -110,7 +128,13 @@ void ParticleSim::init()
   this->g_particule_position_size_data = new GLfloat[MaxParticles * 4];
   this->g_particule_color_data = new GLfloat[MaxParticles * 4];
 
-  createSphere(this->indices, this->positions, this->spherePositionVbo, this->sphereIndexVbo);
+  createSphere(
+  this->positions, 
+  this->indices, 
+  this->normals,
+  this->spherePositionVbo,
+  this->sphereIndexVbo,
+  this->sphereNormalVbo);
 
   glGenBuffers(1, &particles_position_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
@@ -242,13 +266,23 @@ void ParticleSim::drawContents()
   GLint u_light_intensity = glGetUniformLocation(programID, "u_light_intensity");
   glUniform3f(u_light_intensity, 3, 3, 3);
 
-
   // Same as the billboards tutorial
   // glUniform3f(CameraRight_worldspace_ID, ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0]);
   // glUniform3f(CameraUp_worldspace_ID, ViewMatrix[0][1], ViewMatrix[1][1], ViewMatrix[2][1]);
 
   // glUniformMatrix4fv(ViewProjMatrixID, 1, GL_FALSE, &ViewProjectionMatrix[0][0]);
 
+  glEnableVertexAttribArray(3);
+  glBindBuffer(GL_ARRAY_BUFFER, sphereNormalVbo);
+  glVertexAttribPointer(
+      3,        // attribute. No particular reason for 0, but must match the layout in the shader.
+      3,        // size
+      GL_FLOAT, // type
+      GL_FALSE, // normalized?
+      0,        // stride
+      (void *)0 // array buffer offset
+  );
+  
   // 1rst attribute buffer : vertices
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, spherePositionVbo);
