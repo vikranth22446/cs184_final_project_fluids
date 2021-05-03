@@ -3,6 +3,7 @@
 #include "controls.hpp"
 #include "utils/misc.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include "glm/gtc/type_ptr.hpp" // import to get value ptr
 
 ParticleSim::ParticleSim(Screen *screen, GLFWwindow *window, int max_particles)
 {
@@ -229,9 +230,18 @@ void ParticleSim::drawContents()
   glUniformMatrix4fv(u_model, 1, GL_FALSE, &model[0][0]);
 
   GLint u_view_projection = glGetUniformLocation(programID, "u_view_projection");
-  // glUniformMatrix4fv(u_view_projection, 1, GL_FALSE, &viewProjection[0][0]);
-  // glUniformMatrix4fv(u_view_projection, 1, GL_FALSE, &viewProjection[0][0]);
   glUniformMatrix4fv(u_view_projection, 1, GL_FALSE, viewProjection4f.template cast<float>().data());
+  
+  GLint u_cam_pos = glGetUniformLocation(programID, "u_cam_pos");
+  glm::vec3 c_pos = camera.position();
+  glUniform3f(u_cam_pos, c_pos.x, c_pos.y, c_pos.z);
+
+  GLint u_light_pos = glGetUniformLocation(programID, "u_light_pos");
+  glUniform3f(u_light_pos, 0.5, 2, 2);
+
+  GLint u_light_intensity = glGetUniformLocation(programID, "u_light_intensity");
+  glUniform3f(u_light_intensity, 3, 3, 3);
+
 
   // Same as the billboards tutorial
   // glUniform3f(CameraRight_worldspace_ID, ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0]);
