@@ -9,15 +9,12 @@
 
 class ParticleSim {
 public:
-  ParticleSim(nanogui::Screen *screen, int max_particles);
+  ParticleSim(nanogui::Screen *screen, GLFWwindow *window, int max_particles);
   ~ParticleSim();
 
   void init();
-
   virtual bool isAlive();
   virtual void drawContents();
-
-  // Screen events
 
   virtual bool cursorPosCallbackEvent(double x, double y);
   virtual bool mouseButtonCallbackEvent(int button, int action, int modifiers);
@@ -43,6 +40,7 @@ public:
  GLuint CameraRight_worldspace_ID;
  GLuint CameraUp_worldspace_ID;
  GLuint ViewProjMatrixID;
+ GLFWwindow *window;
 
  private:
   virtual void initGUI(Screen *screen);

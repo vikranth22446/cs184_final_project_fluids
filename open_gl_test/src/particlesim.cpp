@@ -2,8 +2,9 @@
 #include "shader.h"
 #include "controls.hpp"
 
-ParticleSim::ParticleSim(Screen *screen, int max_particles){
+ParticleSim::ParticleSim(Screen *screen, GLFWwindow *window, int max_particles){
   this->screen = screen;
+  this->window = window;
   glEnable(GL_PROGRAM_POINT_SIZE);
   glEnable(GL_DEPTH_TEST);
 
@@ -21,6 +22,7 @@ ParticleSim::~ParticleSim(){
 	glDeleteProgram(programID);
 	glDeleteVertexArrays(1, &VertexArrayID);
 }
+
 // https://www.songho.ca/opengl/gl_sphere.html
 void createSphere(std::vector<GLuint> &indices, std::vector<float> positions, GLuint &spherePositionVbo, GLuint &sphereIndexVbo) {
     int stacks = 20;
@@ -87,7 +89,6 @@ void ParticleSim::init() {
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
 
-
 	// Create and compile our GLSL program from the shaders
 	programID = LoadShaders( "../src/shaders/Particle.vert", "../src/shaders/Particle.frag" );
 
@@ -114,6 +115,7 @@ void ParticleSim::init() {
 	glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
 	// Initialize with empty (NULL) buffer : it will be updated later, each frame.
 	glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
+
 	for(int i=0; i<MaxParticles; i++){
 		int particleIndex = i;
 		this->particlesContainer[particleIndex].pos = glm::vec3(((float) (rand() - RAND_MAX/2)/RAND_MAX) * 40, ((float) (rand() - RAND_MAX/2)/RAND_MAX) * 40,-20.0f);
@@ -121,9 +123,8 @@ void ParticleSim::init() {
 		this->particlesContainer[particleIndex].green = 0.0;
 		this->particlesContainer[particleIndex].blue = 0.0;
 		this->particlesContainer[particleIndex].alpha = 1.0;
-
 		this->particlesContainer[particleIndex].size = .2;
-		}
+	}
 
 }
 

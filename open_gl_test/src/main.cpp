@@ -118,7 +118,7 @@ int main( void )
   glfwSetErrorCallback(error_callback);
   createGLContexts();
   // Call this after all the widgets have been defined
-  app = new ParticleSim(screen, 1000);
+  app = new ParticleSim(screen, window, 1000);
 
   screen->setVisible(true);
   screen->performLayout();
@@ -135,7 +135,6 @@ int main( void )
 	int nbFrames = 0;
 	double lastTime = glfwGetTime();
 	double lastFPSTime = glfwGetTime();
-
 	app->init();
 
 	// The VBO containing the 4 vertices of the particles.

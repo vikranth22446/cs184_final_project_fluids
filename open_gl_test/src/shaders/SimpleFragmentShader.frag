@@ -8,5 +8,4 @@ void main()
 
 	// Output color = red 
 	color = vec3(1,1,1);
-
 }
