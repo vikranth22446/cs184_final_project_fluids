@@ -4,6 +4,10 @@
 #include <iostream>
 #include "point_flann_adapter.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 float dist(glm::vec3 pos1, glm::vec3 pos2) {
   return sqrt(pow((pos1.x - pos2.x), 2) + pow((pos1.y - pos2.y), 2) + pow((pos1.z - pos2.z), 2));
 }

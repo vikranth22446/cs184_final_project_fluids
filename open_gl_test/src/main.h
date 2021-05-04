@@ -11,7 +11,7 @@
 
 #ifdef _WIN32
 //#include "misc/getopt.h" // getopt for windows
-#include "getopt.h"
+//#include "getopt.h"
 #else
 #include <getopt.h>
 #include <unistd.h>

@@ -322,6 +322,8 @@ RECENT REVISION HISTORY:
 
 #define STBI_VERSION 1
 
+#define STB_IMAGE_IMPLEMENTATION
+
 enum
 {
    STBI_default = 0, // only used for desired_channels
