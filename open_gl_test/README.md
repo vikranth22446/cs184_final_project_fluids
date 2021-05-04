@@ -9,6 +9,15 @@ cd build/
 cmake -DCMAKE_BUILD_TYPE=RELEASE ..
 make
 ```
+On Linux:
+sudo apt install libglm-dev
+sudo apt-get install libglfw3-dev
+
+On Mac:
+brew install glm glfw glew 
+
+On Windows:
+
 
 References:
 - nano-gui: used to render text and buttons on the screen easily
