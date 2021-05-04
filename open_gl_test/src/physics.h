@@ -3,7 +3,7 @@
 #include "particle.h"
 #include "glm/glm.hpp"
 #include "nanoflann.h"
-#include "PointCloudAdapter.h"
+#include "point_flann_adapter.h"
 typedef nanoflann::KDTreeSingleIndexAdaptor<nanoflann::L2_Simple_Adaptor<float, PointsAdaptor>,PointsAdaptor, 3> Points_KD_Tree_t;
 
 float dist(glm::vec3 pos1, glm::vec3 pos2);

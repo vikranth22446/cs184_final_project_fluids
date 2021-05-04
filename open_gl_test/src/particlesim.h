@@ -40,9 +40,6 @@ public:
 
  GLuint VertexArrayID;
  GLuint programID; // reference to shader
- GLuint CameraRight_worldspace_ID;
- GLuint CameraUp_worldspace_ID;
- GLuint ViewProjMatrixID;
  GLFWwindow *window;
 
 // camera controls
@@ -112,6 +109,12 @@ public:
   Vector2i default_window_size = Vector2i(1024, 800);
 
   Particle *particlesContainer;
+
+
+  // Loading Textures
+  glm::vec3 m_gl_texture_1_size;
+  GLuint m_gl_texture_1;
+
 };
 
 

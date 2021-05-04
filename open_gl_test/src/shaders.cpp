@@ -2,6 +2,8 @@
 
 #include "main.h"
 #include "shader.h"
+#include "glm/glm.hpp"
+#include "utils/stb_image.h"
 
 GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path){
 
@@ -95,4 +97,50 @@ GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path
 	glDeleteShader(FragmentShaderID);
 
 	return ProgramID;
+}
+
+
+
+glm::vec3 load_texture(int frame_idx, GLuint handle, const char* where) {
+  glm::vec3 size_retval;
+  
+  if (strlen(where) == 0) return size_retval;
+  
+  glActiveTexture(GL_TEXTURE0 + frame_idx);
+  glBindTexture(GL_TEXTURE_2D, handle);
+  
+  
+  int img_x, img_y, img_n;
+  unsigned char* img_data = stbi_load(where, &img_x, &img_y, &img_n, 3);
+  size_retval.x = img_x;
+  size_retval.y = img_y;
+  size_retval.z = img_n;
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img_x, img_y, 0, GL_RGB, GL_UNSIGNED_BYTE, img_data);
+  stbi_image_free(img_data);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  
+  return size_retval;
+}
+
+void load_cubemap(int frame_idx, GLuint handle, const std::vector<std::string>& file_locs) {
+  glActiveTexture(GL_TEXTURE0 + frame_idx);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, handle);
+  for (int side_idx = 0; side_idx < 6; ++side_idx) {
+    
+    int img_x, img_y, img_n;
+    unsigned char* img_data = stbi_load(file_locs[side_idx].c_str(), &img_x, &img_y, &img_n, 3);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side_idx, 0, GL_RGB, img_x, img_y, 0, GL_RGB, GL_UNSIGNED_BYTE, img_data);
+    stbi_image_free(img_data);
+    std::cout << "Side " << side_idx << " has dimensions " << img_x << ", " << img_y << std::endl;
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+  }
 }

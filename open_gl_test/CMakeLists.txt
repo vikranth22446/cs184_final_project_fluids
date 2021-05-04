@@ -160,6 +160,8 @@ endif(WIN32)
 #-------------------------------------------------------------------------------
 # nanogui configuration and compilation
 #-------------------------------------------------------------------------------
+set(CMAKE_CXX_FLAGS_DEBUG_INIT "-Wall")
+set(CMAKE_CXX_FLAGS_RELEASE_INIT "-Wall")
 
 # Disable building extras we won't need (pure C++ project)
 set(NANOGUI_BUILD_EXAMPLE OFF CACHE BOOL " " FORCE)
@@ -221,6 +223,19 @@ if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
+
+# STATIC stuff (Windows)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+        set(BUILD_FOR_WIN TRUE)
+endif()
+option(STATIC_BUILD "Build a static binary." ${BUILD_FOR_WIN})
+
+if (STATIC_BUILD)
+        set(CMAKE_EXE_LINKER_FLAGS "-static")
+        set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" CONFIG)
+        set(BUILD_SHARED_LIBS OFF)
+endif()
+
 #-------------------------------------------------------------------------------
 # Add subdirectories
 #-------------------------------------------------------------------------------

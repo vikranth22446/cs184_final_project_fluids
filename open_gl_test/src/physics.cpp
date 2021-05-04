@@ -2,7 +2,7 @@
 #include "particle.h"
 #include "physics.h"
 #include <iostream>
-#include "PointCloudAdapter.h"
+#include "point_flann_adapter.h"
 
 float dist(glm::vec3 pos1, glm::vec3 pos2) {
   return sqrt(pow((pos1.x - pos2.x), 2) + pow((pos1.y - pos2.y), 2) + pow((pos1.z - pos2.z), 2));
@@ -239,16 +239,16 @@ void updatePosition(int max_particles, Particle particlesContainer[]) {
         particlesContainer[i].vel = new_vel;
         particlesContainer[i].pos = new_pos;
 
-        if(particle->pos.x < -1) {
-            particle->pos.x = -1.0f;
+        if(particle->pos.x < -1.5) {
+            particle->pos.x = -1.5f;
             particle->vel.x *= -1*.8;
         } 
-        if(particle->pos.x > 1) {
-            particle->pos.x = 1.0f;
+        if(particle->pos.x > 1.5) {
+            particle->pos.x = 1.5f;
             particle->vel.x *= -1*.8;
         } 
-        if(particle->pos.y < -1) {
-            particle->pos.y = -1.0f;
+        if(particle->pos.y < -1.5) {
+            particle->pos.y = -1.5f;
             particle->vel.y *= -1*.8;
         }
         if(particle->pos.y > 1) {
@@ -261,7 +261,7 @@ void updatePosition(int max_particles, Particle particlesContainer[]) {
         }
         if(particle->pos.z > 1) {
             particle->pos.z = 1.0f;
-            particle->vel.z *= -1*.5;
+            particle->vel.z *= -1*.8;
         }
 
         // const net_force = vvadd_multiple([particle.pressure_force, particle.viscosity_force, particle.gravity_force, particle.surface_tension])

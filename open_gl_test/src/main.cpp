@@ -2,7 +2,6 @@
 #include "shader.h"
 #include "particle.h"
 #include "particlesim.h"
-#include "PointCloudAdapter.h"
 
 ParticleSim *app = nullptr;
 GLFWwindow *window = nullptr;
@@ -139,7 +138,7 @@ int main(void)
 
 	// Dark blue background
 	glClearColor(background.x, background.y, background.b, background.a);
-	
+
 	// fps counter logic https://www.opengl-tutorial.org/miscellaneous/an-fps-counter/
 	int nbFrames = 0;
 	double lastTime = glfwGetTime();
@@ -171,8 +170,9 @@ int main(void)
 			nbFrames = 0;
 			lastFPSTime += 1.0;
 		}
-		
-		if (!app->isAlive()) {
+
+		if (!app->isAlive())
+		{
 			glfwSetWindowShouldClose(window, 1);
 		}
 	} // Check if the ESC key was pressed or the window was closed

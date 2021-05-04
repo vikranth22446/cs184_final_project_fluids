@@ -2,6 +2,13 @@
 
 Core fluid simulation logic: <TODO add paper link>
 
+Building the code
+```
+mkdir build
+cd build/
+cmake -DCMAKE_BUILD_TYPE=RELEASE ..
+make
+```
 
 References:
 - nano-gui: used to render text and buttons on the screen easily

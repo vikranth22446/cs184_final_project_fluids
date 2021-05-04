@@ -1,5 +1,5 @@
-#ifndef POINT_CLOUD_H
-#define POINT_CLOUD_H
+#ifndef POINT_FLANN_ADAPTER_H
+#define POINT_FLANN_ADAPTER_H
 
 #include "main.h"
 #include "nanoflann.h"
@@ -34,8 +34,5 @@ private:
 	const Particle* particleContainer;
 	const int max_particles;
 };
-
-void testPointCloud();
-void createPointCloud(Particle particlesContainer[]); 
 
 #endif

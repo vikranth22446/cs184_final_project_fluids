@@ -7,7 +7,6 @@ set(FLUIDSIM_VIEWER_SOURCE
     particlesim.cpp
     camera.cpp
     physics.cpp
-    PointCloudAdapter.cpp
 )
 
 #-------------------------------------------------------------------------------

@@ -25,6 +25,7 @@ ParticleSim::~ParticleSim()
   glDeleteBuffers(1, &particles_color_buffer);
   glDeleteBuffers(1, &particles_position_buffer);
   glDeleteBuffers(1, &spherePositionVbo);
+  glDeleteTextures(1, &m_gl_texture_1);
   glDeleteProgram(programID);
   glDeleteVertexArrays(1, &VertexArrayID);
 }
@@ -117,12 +118,7 @@ void ParticleSim::init()
   glBindVertexArray(VertexArrayID);
 
   // Create and compile our GLSL program from the shaders
-  programID = LoadShaders("../src/shaders/Particle.vert", "../src/shaders/Particle.frag");
-
-  // Vertex shader
-  CameraRight_worldspace_ID = glGetUniformLocation(programID, "CameraRight_worldspace");
-  CameraUp_worldspace_ID = glGetUniformLocation(programID, "CameraUp_worldspace");
-  ViewProjMatrixID = glGetUniformLocation(programID, "VP");
+  programID = LoadShaders("../src/shaders/Particle.vert", "../src/shaders/Mirror.frag");
 
   const int MaxParticles = this->max_particles;
   this->g_particule_position_size_data = new GLfloat[MaxParticles * 4];
@@ -146,6 +142,13 @@ void ParticleSim::init()
   glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
   // Initialize with empty (NULL) buffer : it will be updated later, each frame.
   glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
+  
+  
+  glGenTextures(1, &m_gl_texture_1);
+  m_gl_texture_1_size = load_texture(1, m_gl_texture_1, "../src/textures/texture2.jpeg");
+
+  
+  
   glm::vec3 avg_pm_position(0, 0, 0);
 
   // https://scicomp.stackexchange.com/questions/14450/how-to-get-proper-parameters-of-sph-simulation
@@ -273,6 +276,15 @@ void ParticleSim::drawContents()
 
   GLint u_light_intensity = glGetUniformLocation(programID, "u_light_intensity");
   glUniform3f(u_light_intensity, 3, 3, 3);
+
+  GLint u_texture_1_size = glGetUniformLocation(programID, "u_texture_1_size");
+  glUniform2f(u_texture_1_size, m_gl_texture_1_size.x, m_gl_texture_1_size.y);
+
+  GLint u_texture_1 = glGetUniformLocation(programID, "u_texture_1");
+  glUniform1i(u_texture_1, 1); // 1 bc this is the first texture
+
+
+
 
   // Same as the billboards tutorial
   // glUniform3f(CameraRight_worldspace_ID, ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0]);
