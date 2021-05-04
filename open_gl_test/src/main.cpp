@@ -2,6 +2,7 @@
 #include "shader.h"
 #include "particle.h"
 #include "particlesim.h"
+#include "PointCloudAdapter.h"
 
 ParticleSim *app = nullptr;
 GLFWwindow *window = nullptr;
@@ -119,11 +120,12 @@ void setGLFWCallbacks()
 
 int main(void)
 {
+	testPointCloud();
 	// Initialise GLFW
 	glfwSetErrorCallback(error_callback);
 	createGLContexts();
 	// Call this after all the widgets have been defined
-	app = new ParticleSim(screen, window, 1000);
+	app = new ParticleSim(screen, window, MAX_PARTICLES);
 
 	screen->setVisible(true);
 	screen->performLayout();
