@@ -195,27 +195,27 @@ void updatePosition(Particle particlesContainer[]) {
 
         if(particle->pos.x < -1.5) {
             particle->pos.x = -1.5f;
-            particle->vel.x *= -1*.8;
+            particle->vel.x *= -1*dampening;
         } 
         if(particle->pos.x > 1.5) {
             particle->pos.x = 1.5f;
-            particle->vel.x *= -1*.8;
+            particle->vel.x *= -1*dampening;
         } 
         if(particle->pos.y < -1.5) {
             particle->pos.y = -1.5f;
-            particle->vel.y *= -1*.8;
+            particle->vel.y *= -1*dampening;
         }
         if(particle->pos.y > 1) {
             particle->pos.y = 1.0f;
-            particle->vel.y *= -1*.8;
+            particle->vel.y *= -1*dampening;
         } 
         if(particle->pos.z < -1) {
             particle->pos.z = -1.0f;
-            particle->vel.z *= -1*.8;
+            particle->vel.z *= -1*dampening;
         }
         if(particle->pos.z > 1) {
             particle->pos.z = 1.0f;
-            particle->vel.z *= -1*.8;
+            particle->vel.z *= -1*dampening;
         }
 
 

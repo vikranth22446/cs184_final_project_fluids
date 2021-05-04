@@ -1,6 +1,8 @@
 #ifndef FLUID_CONSTANTS_H
 #define FLUID_CONSTANTS_H
 #include <string>
+#include "glm/glm.hpp"
+
 const int MAX_PARTICLES = 4000;
 
 // https://www.engineeringtoolbox.com/surface-tension-d_962.html
@@ -22,6 +24,7 @@ const unsigned int num_kd_results = 32;
 // Update rate
 const float delta_t = 1.0/60.0;
 
+const float dampening = .8;
 const float BOX_SIZE = 1.0;
 
 // TODO figure out better way to add const* strings instead of #define for type safety. 
