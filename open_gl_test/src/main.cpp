@@ -120,7 +120,7 @@ void setGLFWCallbacks()
 
 int main(void)
 {
-	testPointCloud();
+	// testPointCloud();
 	// Initialise GLFW
 	glfwSetErrorCallback(error_callback);
 	createGLContexts();

@@ -3,13 +3,14 @@
 
 #include "main.h"
 #include "nanoflann.h"
+
 class PointsAdaptor
 {
 public:
-	PointsAdaptor(const Particle *particleContainer) : particleContainer(particleContainer) { }
+	PointsAdaptor(const Particle *particleContainer, int max_particles) : particleContainer(particleContainer), max_particles(max_particles) { }
 
 	inline unsigned int kdtree_get_point_count() const
-	{ return 4; }
+	{ return max_particles; }
 
 	inline float kdtree_distance(const float* p1, const unsigned int index_2,
 			unsigned int size) const
@@ -31,6 +32,7 @@ public:
 
 private:
 	const Particle* particleContainer;
+	const int max_particles;
 };
 
 void testPointCloud();

@@ -1,7 +1,7 @@
 // // Include standard headers
 #ifndef MAIN_H
 #define MAIN_H
-#define MAX_PARTICLES 100
+#define MAX_PARTICLES 5000
 
 #include <iostream>
 #include <fstream>
