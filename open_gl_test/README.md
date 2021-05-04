@@ -35,33 +35,36 @@ References:
 # Building the project in Visual Studio for Windows
 
 We had some compatibility issues building the project for Windows as the project was created using Linux. You can try using Ubuntu for Windows and setting up a display to access a GUI. That did not work for us. Below is our solution:
-<br>
+
 Install vcpkg (CS184 students should already have this) and cd into the directory.
 Run the following commands to download and install the packages needed for OpenGL:
-<br>
-	./vcpkg install glm
-	./vcpkg install glew
-	./vcpkg install glfw3
-	./vcpkg integrate install
-<br>
+```	
+./vcpkg install glm
+./vcpkg install glew
+./vcpkg install glfw3
+./vcpkg integrate install
+```
+
 Next open the project (open_gl_test should be the root folder) and right click on CMakeLists.txt to open the CMake Settings. Add x64-Release and your CMake toolchain as usual. Navigate down to "CMake variables and cache" where you will see "GLEW_DIR", "GLFW3_INCLUDE_DIR", "GLFW3_LIBRARY", and "GLM_INCLUDE_DIR". Find the paths in your vcpkg directory (vcpkg/packages) and set the paths for the corresponding CMake variables. They will look something like the following:
-	vcpkg/packages/glew_x86-windows
-	vcpkg/packages/glfw3_x86-windows
-	vcpkg/packages/glfw3_x86-windows/lib/glfw3dll.lib
-	vcpkg/packages/glm_x86-windows/include
-<br>
+- vcpkg/packages/glew_x86-windows
+- vcpkg/packages/glfw3_x86-windows
+- vcpkg/packages/glfw3_x86-windows/lib/glfw3dll.lib
+- vcpkg/packages/glm_x86-windows/include
 
 If there is a build error with 'misc/getopt.h', go into main.h and comment out "#include 'misc/getopt.h'" in the if statement for WIN32.
 
-<br>
 
 If you get the error "'M_PI':undeclared identifier' in the physics.cpp, it means math.h does not define it. Declare a definition like so:
-	#ifndef M_PI
-	#define M_PI 3.14159265358979323846
-	#endif
-<br>
+```
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+```
+
 Finally, if there are external reference errors concerning stb_image, head over to utils/stb_image.h and add the following line to the top of the file:
-	 "#define STB_IMAGE_IMPLEMENTATION"
-<br>
+```	 
+#define STB_IMAGE_IMPLEMENTATION
+```
+
 Hopefully, this guide helped you get the project building for Windows. Quite a nuiscance!`
 
