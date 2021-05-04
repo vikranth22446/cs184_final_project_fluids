@@ -42,7 +42,7 @@ link_directories(
 #-------------------------------------------------------------------------------
 # Add executable
 #-------------------------------------------------------------------------------
-add_executable(fluidsim ${FLUIDSIM_VIEWER_SOURCE})
+add_executable(fluidsim ${FLUIDSIM_VIEWER_SOURCE} "getopt.h")
 
 target_link_libraries(fluidsim
     nanogui ${NANOGUI_EXTRA_LIBS}

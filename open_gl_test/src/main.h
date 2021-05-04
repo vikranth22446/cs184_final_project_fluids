@@ -10,7 +10,8 @@
 #include <stdlib.h>
 
 #ifdef _WIN32
-#include "misc/getopt.h" // getopt for windows
+//#include "misc/getopt.h" // getopt for windows
+#include "getopt.h"
 #else
 #include <getopt.h>
 #include <unistd.h>
