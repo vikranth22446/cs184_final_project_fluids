@@ -47,7 +47,7 @@ void createSphere(
 {
   int stacks = 20;
   int slices = 20;
-  const float radius = .1;
+  const float radius = sphere_radius;
 
   // loop through stacks.
   for (int i = 0; i <= stacks; ++i)
@@ -164,7 +164,7 @@ void ParticleSim::init()
   for (int i = 0; i < MAX_PARTICLES; i++)
   {
     int particleIndex = i;
-    this->particlesContainer[particleIndex].pos = glm::vec3(randfloat() * BOX_SIZE, randfloat() * BOX_SIZE, randfloat() * BOX_SIZE);
+    this->particlesContainer[particleIndex].pos = glm::vec3(randfloat() * BOX_SIZE, randfloat() * BOX_SIZE * 1.5, randfloat() * BOX_SIZE);
     this->particlesContainer[particleIndex].vel = glm::vec3(0.0f);
     this->particlesContainer[particleIndex].mass = particle_inital_mass;
     

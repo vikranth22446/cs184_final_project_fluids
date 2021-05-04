@@ -2,6 +2,7 @@
 // These are the inputs which are the outputs of the vertex shader.
 
 uniform vec3 u_cam_pos;
+uniform vec3 u_light_pos;
 
 uniform sampler2D u_texture_1;
 
@@ -24,6 +25,7 @@ void main() {
   vec2 wi_3 = vec2(wi[0], wi[1]);
   // texture only accepts the 3d vector for wi
 //   wi_3 = vec2(.5, .5);
+  wi_3 = clamp(wi_3, 0.0, 1.0); 
 
   color = texture(u_texture_1, wi_3);
 

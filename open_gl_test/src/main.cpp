@@ -134,7 +134,8 @@ int main(void)
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 	glm::vec4 grayBackround = glm::vec4(.25f);
 	glm::vec4 whiteBackground = glm::vec4(1.0f);
-	glm::vec4 background = whiteBackground;
+	glm::vec4 blackBackground = glm::vec4(0.0f);
+	glm::vec4 background = blackBackground;
 
 	// Dark blue background
 	glClearColor(background.x, background.y, background.b, background.a);
