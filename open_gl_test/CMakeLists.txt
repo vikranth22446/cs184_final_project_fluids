@@ -34,10 +34,10 @@ if(APPLE)
   find_library (COCOA_LIBRARIES Cocoa)
   find_library (IOKIT_LIBRARIES IOkit)
   find_library (COREVIDEO_LIBRARIES CoreVideo)
+  message("Test ${CMAKE_CXX_COMPILER_ID}")
 
   # Clang configuration
-  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-
+  if(CMAKE_CXX_COMPILER_ID MATCHES "^(Apple)?Clang$")
     set(CLANG_CXX_FLAGS "-std=c++11 -m64")
 
     if(BUILD_DEBUG)
@@ -49,6 +49,24 @@ if(APPLE)
       set(CLANG_CXX_FLAGS "${CLANG_CXX_FLAGS} -Wno-narrowing")
       set(CLANG_CXX_FLAGS "${CLANG_CXX_FLAGS} -Wno-deprecated-register")
     endif(BUILD_DEBUG)
+
+
+    if(CMAKE_C_COMPILER_ID MATCHES "^(Apple)?Clang$")
+        set(OpenMP_C "${CMAKE_C_COMPILER}")
+        set(OpenMP_C_FLAGS "-fopenmp=lomp -Wno-unused-command-line-argument")
+        set(OpenMP_C_LIB_NAMES "libomp" "libgomp" "libiomp5")
+        set(OpenMP_libomp_LIBRARY ${OpenMP_C_LIB_NAMES})
+        set(OpenMP_libgomp_LIBRARY ${OpenMP_C_LIB_NAMES})
+        set(OpenMP_libiomp5_LIBRARY ${OpenMP_C_LIB_NAMES})
+    endif()
+    if(CMAKE_CXX_COMPILER_ID MATCHES "^(Apple)?Clang$")
+      set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
+      set(OpenMP_CXX_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")
+      set(OpenMP_CXX_LIB_NAMES "libomp" "libgomp" "libiomp5")
+      set(OpenMP_libomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+      set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+      set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+    endif()
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CLANG_CXX_FLAGS}")
 
@@ -113,7 +131,6 @@ if(UNIX AND NOT APPLE)
   endif()
 
 endif()
-
 ####################
 # Build on Windows #
 ####################
@@ -223,6 +240,7 @@ if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
+message(STATUS "Open mp found in ${OPENMP_FOUND}")
 
 # STATIC stuff (Windows)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
