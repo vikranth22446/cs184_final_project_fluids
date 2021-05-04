@@ -4,27 +4,32 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "glm/gtc/type_ptr.hpp" // import to get value ptr
 #include "physics.h"
+#include "constants.h"
 
-ParticleSim::ParticleSim(Screen *screen, GLFWwindow *window, int max_particles)
+ParticleSim::ParticleSim(Screen *screen, GLFWwindow *window)
 {
   this->screen = screen;
   this->window = window;
   glEnable(GL_PROGRAM_POINT_SIZE);
   glEnable(GL_DEPTH_TEST);
 
-  this->max_particles = max_particles;
-  this->particlesContainer = new Particle[this->max_particles];
+  this->particlesContainer = new Particle[MAX_PARTICLES];
 }
 
 ParticleSim::~ParticleSim()
 {
   delete[] this->particlesContainer;
   delete[] g_particule_position_size_data;
+  delete[] g_particule_color_data;
 
   // Cleanup VBO and shader
   glDeleteBuffers(1, &particles_color_buffer);
   glDeleteBuffers(1, &particles_position_buffer);
+
   glDeleteBuffers(1, &spherePositionVbo);
+  glDeleteBuffers(1, &sphereIndexVbo);
+  glDeleteBuffers(1, &sphereNormalVbo);
+
   glDeleteTextures(1, &m_gl_texture_1);
   glDeleteProgram(programID);
   glDeleteVertexArrays(1, &VertexArrayID);
@@ -104,6 +109,10 @@ void createSphere(
   // sphereIndexCount = indices.size();
 }
 
+float randfloat() {
+  return ((float)(rand() - RAND_MAX / 2) / RAND_MAX);
+}
+
 void ParticleSim::init()
 {
   screen->setSize(default_window_size);
@@ -118,11 +127,10 @@ void ParticleSim::init()
   glBindVertexArray(VertexArrayID);
 
   // Create and compile our GLSL program from the shaders
-  programID = LoadShaders("../src/shaders/Particle.vert", "../src/shaders/Mirror.frag");
+  programID = LoadShaders(vertex_shader_file, fragment_shader_file);
 
-  const int MaxParticles = this->max_particles;
-  this->g_particule_position_size_data = new GLfloat[MaxParticles * 4];
-  this->g_particule_color_data = new GLfloat[MaxParticles * 4];
+  this->g_particule_position_size_data = new GLfloat[MAX_PARTICLES * 4];
+  this->g_particule_color_data = new GLfloat[MAX_PARTICLES * 4];
 
   createSphere(
   this->positions, 
@@ -135,17 +143,17 @@ void ParticleSim::init()
   glGenBuffers(1, &particles_position_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
   // Initialize with empty (NULL) buffer : it will be updated later, each frame.
-  glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLES * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
 
   // The VBO containing the colors of the particles
   glGenBuffers(1, &particles_color_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
   // Initialize with empty (NULL) buffer : it will be updated later, each frame.
-  glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLES * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
   
   
   glGenTextures(1, &m_gl_texture_1);
-  m_gl_texture_1_size = load_texture(1, m_gl_texture_1, "../src/textures/texture2.jpeg");
+  m_gl_texture_1_size = load_texture(1, m_gl_texture_1, texture_shader_file);
 
   
   
@@ -153,12 +161,12 @@ void ParticleSim::init()
 
   // https://scicomp.stackexchange.com/questions/14450/how-to-get-proper-parameters-of-sph-simulation
   float max_width = 0.0, max_height = 0.0;
-  for (int i = 0; i < MaxParticles; i++)
+  for (int i = 0; i < MAX_PARTICLES; i++)
   {
     int particleIndex = i;
-    this->particlesContainer[particleIndex].pos = glm::vec3(((float)(rand() - RAND_MAX / 2) / RAND_MAX) * 1, ((float)(rand() - RAND_MAX / 2) / RAND_MAX) * 1, ((float)(rand() - RAND_MAX / 2) / RAND_MAX) * 1);
+    this->particlesContainer[particleIndex].pos = glm::vec3(randfloat() * BOX_SIZE, randfloat() * BOX_SIZE, randfloat() * BOX_SIZE);
     this->particlesContainer[particleIndex].vel = glm::vec3(0.0f);
-    this->particlesContainer[particleIndex].mass = 0.08373333333333335;
+    this->particlesContainer[particleIndex].mass = particle_inital_mass;
     
     this->particlesContainer[particleIndex].red = 1.0;
     this->particlesContainer[particleIndex].green = 0.0;
@@ -170,7 +178,7 @@ void ParticleSim::init()
     max_height = max(max_height, this->particlesContainer[particleIndex].pos[1]);
   }
 
-  avg_pm_position = avg_pm_position * (float)(1.0 / MaxParticles);
+  avg_pm_position = avg_pm_position * (float)(1.0 / MAX_PARTICLES);
 
   fluid_camera::CameraInfo camera_info;
   camera_info.hFov = 80;
@@ -213,7 +221,7 @@ void ParticleSim::initGUI(Screen *screen)
 
 void ParticleSim::drawContents()
 {
-  updatePosition(this->max_particles, this->particlesContainer);
+  updatePosition(this->particlesContainer);
 
   glEnable(GL_DEPTH_TEST);
 
@@ -228,7 +236,7 @@ void ParticleSim::drawContents()
 
   // Simulate all particles
   #pragma omp parallel for
-  for (int i = 0; i < this->max_particles; i++)
+  for (int i = 0; i < MAX_PARTICLES; i++)
   {
     Particle &p = this->particlesContainer[i]; // shortcut
     this->g_particule_position_size_data[4 * i + 0] = p.pos.x;
@@ -248,12 +256,12 @@ void ParticleSim::drawContents()
   // http://www.opengl.org/wiki/Buffer_Object_Streaming
 
   glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
-  glBufferData(GL_ARRAY_BUFFER, this->max_particles * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
-  glBufferSubData(GL_ARRAY_BUFFER, 0, this->max_particles * sizeof(GLfloat) * 4, g_particule_position_size_data);
+  glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLES * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
+  glBufferSubData(GL_ARRAY_BUFFER, 0, MAX_PARTICLES * sizeof(GLfloat) * 4, g_particule_position_size_data);
 
   glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
-  glBufferData(GL_ARRAY_BUFFER, this->max_particles * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
-  glBufferSubData(GL_ARRAY_BUFFER, 0, this->max_particles * sizeof(GLfloat) * 4, g_particule_color_data);
+  glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLES * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
+  glBufferSubData(GL_ARRAY_BUFFER, 0, MAX_PARTICLES * sizeof(GLfloat) * 4, g_particule_color_data);
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -357,7 +365,7 @@ void ParticleSim::drawContents()
       indices.size(),  // count
       GL_UNSIGNED_INT, // type
       (void *)0,       // element array buffer offset
-      this->max_particles);
+      MAX_PARTICLES);
 
   glDisableVertexAttribArray(0);
   glDisableVertexAttribArray(1);

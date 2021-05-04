@@ -10,7 +10,7 @@
 
 class ParticleSim {
 public:
-  ParticleSim(nanogui::Screen *screen, GLFWwindow *window, int max_particles);
+  ParticleSim(nanogui::Screen *screen, GLFWwindow *window);
   ~ParticleSim();
 
   void init();
@@ -25,7 +25,6 @@ public:
   virtual bool resizeCallbackEvent(int width, int height);
  
  // Rendering helpers
- int max_particles;
  GLuint spherePositionVbo;
  GLuint sphereIndexVbo;
  GLuint sphereNormalVbo;

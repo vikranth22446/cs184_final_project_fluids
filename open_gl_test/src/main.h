@@ -1,8 +1,7 @@
 // // Include standard headers
 #ifndef MAIN_H
 #define MAIN_H
-#define MAX_PARTICLES 10000
-
+#include "constants.h"
 #include <iostream>
 #include <fstream>
 #include <nanogui/nanogui.h> // already includes  #include <GL/glew.h>

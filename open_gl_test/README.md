@@ -30,3 +30,4 @@ References:
     - https://github.com/Erkaman/cute-deferred-shading also helpful in looking at how vbo shaders worked
     - gluSphere is old so choose to manually setup with slices and stacks
     - we used both indexed vbo for performance
+- https://matthias-research.github.io/pages/publications/sca03.pdf
