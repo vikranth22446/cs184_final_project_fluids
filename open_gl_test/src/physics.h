@@ -19,6 +19,6 @@ glm::vec3 compute_pressure(Particle *particle, Particle particlesContainer[], Po
 glm::vec3 compute_viscosity(Particle *particle, Particle particlesContainer[], Points_KD_Tree_t *index);
 glm::vec3 compute_gravity(Particle *particle);
 glm::vec3 compute_surface_tension(Particle *particle, Particle particlesContainer[], Points_KD_Tree_t *index);
-void updatePosition(Particle particlesContainer[]);
+void updatePosition(Particle particlesContainer[], ExternalForce *external_force);
 
 #endif

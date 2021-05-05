@@ -1,12 +1,13 @@
-#include "main.h"
-#include "particle.h"
-#include "camera.h"
+
 
 #ifndef PARTICLE_SIM_H
 #define PARTICLE_SIM_H
 
 #include "glm/glm.hpp"
 #include <memory>
+#include "main.h"
+#include "particle.h"
+#include "camera.h"
 
 class ParticleSim {
 public:
@@ -95,10 +96,12 @@ public:
 
   // Simulation flags
 
-  bool is_paused = true;
+  bool is_paused = false;
+  bool pause_camera = false;
 
   // Screen attributes
 
+  ExternalForce *external_force;
   int mouse_x;
   int mouse_y;
 

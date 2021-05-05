@@ -14,11 +14,13 @@ ParticleSim::ParticleSim(Screen *screen, GLFWwindow *window)
   glEnable(GL_DEPTH_TEST);
 
   this->particlesContainer = new Particle[MAX_PARTICLES];
+  this->external_force = new ExternalForce();
 }
 
 ParticleSim::~ParticleSim()
 {
   delete[] this->particlesContainer;
+  delete this->external_force;
   delete[] g_particule_position_size_data;
   delete[] g_particule_color_data;
 
@@ -240,8 +242,9 @@ void ParticleSim::initGUI(Screen *screen)
 
 void ParticleSim::drawContents()
 {
-  updatePosition(this->particlesContainer);
-
+  if(!is_paused) {
+    updatePosition(this->particlesContainer, this->external_force);
+  }
   glEnable(GL_DEPTH_TEST);
 
   glm::mat4 model = glm::mat4x4(1.0);
@@ -555,12 +558,42 @@ void ParticleSim::mouseMoved(double x, double y) { y = screen_h - y; }
 void ParticleSim::mouseLeftDragged(double x, double y) {
   float dx = x - mouse_x;
   float dy = y - mouse_y;
+  if(!pause_camera) {
+    camera.rotate_by(-dy * (PI / screen_h), -dx * (PI / screen_w));
+  } else {
+    bool external_mouse_force_enabled = true;
+    glm::vec2 current_xy = glm::vec2(x/screen_w, y/screen_h);
+    glm::vec2 current_dxdy = normalize(glm::vec2(dx, dy));
 
-  camera.rotate_by(-dy * (PI / screen_h), -dx * (PI / screen_w));
+    this->external_force->external_mouse_force_enabled = true;
+    this->external_force->current_starting_force = current_xy;
+    this->external_force->current_dxdy = current_dxdy;
+  }
 }
 
 void ParticleSim::mouseRightDragged(double x, double y) {
-  camera.move_by(mouse_x - x, y - mouse_y, canonical_view_distance);
+  float dx = mouse_x - x;
+  float dy = y - mouse_y;
+  if(!pause_camera) {
+    camera.move_by(dx, dy, canonical_view_distance);
+  } else {
+    // bool external_mouse_force_enabled = true;
+    // glm::vec2 current_xy = glm::vec2(x/screen_w, y/screen_h);
+    // glm::vec2 current_dxdy = glm::vec2(dx/screen_w, dy/screen_h);
+    // glm::vec4 current_xyz = getViewMatrix() * glm::vec4(glm::vec2(x/screen_w, y/screen_h), 1.0f, 1.0f);
+    // glm::vec3 current_xyz_pos = glm::vec3(current_xyz.x, current_xyz.y, current_xyz.z);
+
+    // this->external_force->external_mouse_force_enabled = true;
+    // this->external_force->current_xyz = current_xyz_pos;
+    // this->external_force->current_dxdy = current_dxdy;
+    bool external_mouse_force_enabled = true;
+    glm::vec2 current_xy = glm::vec2(x/screen_w, y/screen_h);
+    glm::vec2 current_dxdy = normalize(glm::vec2(dx/screen_w, dy/screen_h));
+
+    this->external_force->external_mouse_force_enabled = true;
+    this->external_force->current_starting_force = glm::vec2(x/screen_w, y/screen_h);
+    this->external_force->current_dxdy = current_dxdy;
+  }
 }
 
 bool ParticleSim::keyCallbackEvent(int key, int scancode, int action,
@@ -582,6 +615,10 @@ bool ParticleSim::keyCallbackEvent(int key, int scancode, int action,
     case 'p':
     case 'P':
       is_paused = !is_paused;
+      break;
+    case 'c':
+    case 'C':
+      pause_camera = !pause_camera;
       break;
     case 'n':
     case 'N':

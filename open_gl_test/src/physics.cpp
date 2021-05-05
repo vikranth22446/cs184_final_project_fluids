@@ -73,7 +73,7 @@ float density_s(Particle *particle, Particle particlesContainer[], Points_KD_Tre
     return p; 
 }
 
-glm::vec3 compute_force(Particle *particle, Particle particlesContainer[], Points_KD_Tree_t *index) {
+glm::vec3 compute_force(Particle *particle, Particle particlesContainer[], Points_KD_Tree_t *index, ExternalForce *external_force) {
     glm::vec3 f_p = glm::vec3(0.0, 0.0, 0.0);
     glm::vec3 f_v = glm::vec3(0.0, 0.0, 0.0);
     // surface tension constants 
@@ -116,13 +116,22 @@ glm::vec3 compute_force(Particle *particle, Particle particlesContainer[], Point
     const float mass = particle->density * volume; 
     glm::vec3 f_e = glm::vec3(0.0, -9.8 * mass, 0.0); 
     ft = surface_tension_sigma * c * k;
+    
+    if(external_force->external_mouse_force_enabled ) {
+        double r = glm::length(glm::vec2(particle->pos.x, particle->pos.y) - external_force->current_starting_force);
+        if (r < .3) {
+            // glm::vec3 n = glm::vec3(external_force->current_dxdy, 1.0);
+            f_e +=  glm::vec3(0.0, 10 * 9.8 * mass, 0.0);  
+        }
+        // f_e += external_force->current_xyz
+    }
 
     return f_p + f_v + f_e + ft; 
 }
 
 // O(n^2)
 // 
-void updatePosition(Particle particlesContainer[]) {
+void updatePosition(Particle particlesContainer[], ExternalForce *external_force) {
 
 	PointsAdaptor f_adaptor(particlesContainer, MAX_PARTICLES);
 	Points_KD_Tree_t index(3, f_adaptor,nanoflann::KDTreeSingleIndexAdaptorParams(10));
@@ -138,10 +147,11 @@ void updatePosition(Particle particlesContainer[]) {
     // force calculation
     #pragma omp parallel for
     for(int i = 0; i < MAX_PARTICLES; i++) {
-        glm::vec3 net_force = compute_force(&particlesContainer[i], particlesContainer, &index);
+        glm::vec3 net_force = compute_force(&particlesContainer[i], particlesContainer, &index, external_force);
         particlesContainer[i].net_force = net_force;
     }
-    
+    external_force->external_mouse_force_enabled = false;
+
     // #pragma omp parallel for
     // for(int i = 0; i < MAX_PARTICLES; i++) {
     //     glm::vec3 gravity_force = compute_gravity(&particlesContainer[i]);
