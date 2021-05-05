@@ -121,13 +121,19 @@ glm::vec3 compute_force(Particle *particle, Particle particlesContainer[], Point
         double r = glm::dot(particle->pos, external_force->current_starting_force)/(glm::length(external_force->current_starting_force) * glm::length(particle->pos));
         // double r = glm::length(glm::normalize(particle->pos) - glm::normalize(external_force->current_starting_force));
         glm::vec3 n = external_force->current_dxdy;
-        
-        printf("%f\n", r);
         if (r < .3) {
             // glm::vec3 n = glm::vec3(external_force->current_dxdy, 1.0);
             f_e +=  n * mass * 10.0f;  
         }
-        // f_e += external_force->current_xyz
+    }
+
+    if(whirlpool_enabled) {
+        glm::vec3 axis = glm::normalize(glm::vec3(1, 0, 0));
+        float r = glm::dot(particle->pos, axis);
+        glm::vec3 n = glm::vec3(1, 0, 1);
+        if (glm::abs(r) > 0.00001){
+            f_e += 1.0f * n * mass*r * glm::dot(particle->vel, particle->vel);
+        }
     }
 
     return f_p + f_v + f_e + ft; 
