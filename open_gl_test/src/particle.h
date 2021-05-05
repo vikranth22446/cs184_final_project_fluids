@@ -7,6 +7,7 @@ struct Particle {
     float density, mass; 
     float red, green, blue, alpha;
     float size;
+    glm::vec3 net_force;
 
     glm::vec3 pressure_force;
     glm::vec3 external;

@@ -27,16 +27,17 @@ const float particle_inital_mass = 0.0002f;
 // chosen randomly
 const unsigned int num_kd_results = 32;
 // Update rate
-const float delta_t = 1.0/120.0;
+const float delta_t = 1.0/60.0;
 
 const float dampening = .65;
 const float BOX_SIZE = 1.5;
 
-const float sphere_radius = .1;
+const float sphere_radius = .05;
 // TODO figure out better way to add const* strings instead of #define for type safety. 
 #define vertex_shader_file "../src/shaders/Particle.vert"
 #define fragment_shader_file  "../src/shaders/Mirror.frag"
 #define texture_shader_file "../src/textures/texture2.jpeg"
+
 // #define texture_shader_file "../src/textures/water_minecraft.jpeg"
 // #define texture_shader_file "../src/textures/glass_with_water.jpeg"
 // #define texture_shader_file "../src/textures/water_texture_3.jpeg"

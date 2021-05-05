@@ -14,13 +14,11 @@ float w_viscosity(float r);
 float laplace_viscosity(float r);
 float w_spiky(float r);
 float w_spiky_derivative(float r);
-float density_s(Particle *particle, Particle particlesContainer[] );
+float density_s(Particle *particle, Particle particlesContainer[], Points_KD_Tree_t *index);
 glm::vec3 compute_pressure(Particle *particle, Particle particlesContainer[], Points_KD_Tree_t *index);
-glm::vec3 compute_viscosity(Particle *particle, Particle particlesContainer[]);
+glm::vec3 compute_viscosity(Particle *particle, Particle particlesContainer[], Points_KD_Tree_t *index);
 glm::vec3 compute_gravity(Particle *particle);
-glm::vec3 compute_surface_tension(Particle *particle,Particle particlesContainer[]);
-glm::vec3 compute_gravity(Particle *particle);
-glm::vec3 compute_surface_tension(Particle *particle, Particle particlesContainer[]);
+glm::vec3 compute_surface_tension(Particle *particle, Particle particlesContainer[], Points_KD_Tree_t *index);
 void updatePosition(Particle particlesContainer[]);
 
 #endif

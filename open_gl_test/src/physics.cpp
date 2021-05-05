@@ -43,19 +43,44 @@ float w_spiky_derivative(float r) {
     return 15/(M_PI  *h_6) * 3 * pow((h - r), 2) * (-1); 
 }
 
-float density_s(Particle *particle, Particle particlesContainer[] ) {
+float density_s(Particle *particle, Particle particlesContainer[], Points_KD_Tree_t *index) {
     float p = 0; 
-    for (size_t i = 0; i < MAX_PARTICLES; i++) {
-        Particle *other_particle = &particlesContainer[i];
-        int r = dist(other_particle->pos, particle->pos); 
-        p += other_particle->mass * w_poly(r); 
+    // if there is a lot of particles try to add this as the density
+    if(MAX_PARTICLES > 1024 * 4) {
+        std::vector<size_t> ret_indexes(1024);
+        std::vector<float> out_dists_sqr(1024);
+        nanoflann::KNNResultSet<float> resultSet(1024);
+        resultSet.init(&ret_indexes[0], &out_dists_sqr[0]);
+
+        float test_pt[3] = {particle->pos.x, particle->pos.y, particle->pos.z};
+        index->findNeighbors(resultSet, &test_pt[0],
+                nanoflann::SearchParams(10));
+        
+            for (size_t i = 0; i < 1024; i++) {
+                Particle *other_particle = &particlesContainer[ret_indexes[i]];
+                int r = dist(other_particle->pos, particle->pos); 
+                p += other_particle->mass * w_poly(r); 
+        }
+    } else {
+        for (size_t i = 0; i < MAX_PARTICLES; i++) {
+            Particle *other_particle = &particlesContainer[i];
+            int r = dist(other_particle->pos, particle->pos); 
+            p += other_particle->mass * w_poly(r); 
+        }
     }
+
     particle->density = p; 
     return p; 
 }
 
-glm::vec3 compute_pressure(Particle *particle, Particle particlesContainer[], Points_KD_Tree_t *index) {
+glm::vec3 compute_force(Particle *particle, Particle particlesContainer[], Points_KD_Tree_t *index) {
     glm::vec3 f_p = glm::vec3(0.0, 0.0, 0.0);
+    glm::vec3 f_v = glm::vec3(0.0, 0.0, 0.0);
+    // surface tension constants 
+    glm::vec3 ft = glm::vec3(0.0, 0.0, 0.0); 
+    glm::vec3 c = glm::vec3(0.0, 0.0, 0.0); 
+    float k = 0.0; // regular accumulator k
+
     const float pi = pressure_constant_k * (particle->density - pressure_rho_zero); 
 
 	// Perform Knn Search
@@ -68,79 +93,37 @@ glm::vec3 compute_pressure(Particle *particle, Particle particlesContainer[], Po
 	index->findNeighbors(resultSet, &test_pt[0],
 			nanoflann::SearchParams(10));
     
-	for (size_t i = 0; i < num_kd_results; i++) {
+    for (size_t i = 0; i < num_kd_results; i++) {
 		Particle *other_particle = &particlesContainer[ret_indexes[i]];
-        const float pj = pressure_constant_k * (other_particle->density - pressure_rho_zero); 
         const float r = dist(other_particle->pos, particle->pos); 
+        if (r > 2) continue;
+        const float pj = pressure_constant_k * (other_particle->density - pressure_rho_zero); 
         const float pressure = -other_particle->mass*(pi + pj)/(2*other_particle->density) * w_spiky_derivative(r); 
         if (r != 0) {
+            //pressure
             const glm::vec3 n = (particle->pos - other_particle->pos) * (float)(1.0/r); 
             f_p += n * (float)pressure; 
+            // surface tension
+            const float surface_tension = other_particle->mass * 1/(other_particle->density) * w_poly_derivative6(r); 
+            c += surface_tension * n;
+            k +=  other_particle->mass * 1/(other_particle->density) * w_poly_laplacian(r)/r; 
         }
-	}
-
-    return f_p; 
-}
-
-glm::vec3 compute_viscosity(Particle *particle, Particle particlesContainer[], Points_KD_Tree_t *index) {
-    glm::vec3 f_v = glm::vec3(0.0, 0.0, 0.0); 
-    	// Perform Knn Search
-	std::vector<size_t> ret_indexes(num_kd_results);
-	std::vector<float> out_dists_sqr(num_kd_results);
-	nanoflann::KNNResultSet<float> resultSet(num_kd_results);
-	resultSet.init(&ret_indexes[0], &out_dists_sqr[0]);
-
-	float test_pt[3] = {particle->pos.x, particle->pos.y, particle->pos.z};
-	index->findNeighbors(resultSet, &test_pt[0],
-			nanoflann::SearchParams(10));
-    
-	for (size_t i = 0; i < num_kd_results; i++) {
-		Particle *other_particle = &particlesContainer[ret_indexes[i]];
-        const float r = dist(other_particle->pos, particle->pos); 
+        
         glm::vec3 viscosity = -other_particle->mass*(other_particle->vel - particle->vel)/other_particle->density * laplace_viscosity(r); 
         f_v += viscosity;
-    }
-
-    f_v *= viscosity_mu;
-    return f_v;
-}
-
-glm::vec3 compute_gravity(Particle *particle) {
+	}
     const float volume = 1;
     const float mass = particle->density * volume; 
-    return glm::vec3(0.0, -9.8 * mass, 0.0); 
-}
-
-glm::vec3 compute_surface_tension(Particle *particle, Particle particlesContainer[], Points_KD_Tree_t *index) {
-    glm::vec3 ft = glm::vec3(0.0, 0.0, 0.0); 
-    glm::vec3 c = glm::vec3(0.0, 0.0, 0.0); 
-    float k = 0.0; // regular accumulator k
-
-	std::vector<size_t> ret_indexes(num_kd_results);
-	std::vector<float> out_dists_sqr(num_kd_results);
-	nanoflann::KNNResultSet<float> resultSet(num_kd_results);
-	resultSet.init(&ret_indexes[0], &out_dists_sqr[0]);
-
-	float test_pt[3] = {particle->pos.x, particle->pos.y, particle->pos.z};
-	index->findNeighbors(resultSet, &test_pt[0],
-			nanoflann::SearchParams(10));
-    
-	for (size_t i = 0; i < num_kd_results; i++) {
-		Particle *other_particle = &particlesContainer[ret_indexes[i]];
-        const float r = dist(particle->pos, other_particle->pos); 
-        const float surface_tension = other_particle->mass * 1/(other_particle->density) * w_poly_derivative6(r); 
-        if(r != 0) {
-          const glm::vec3 n = (particle->pos - other_particle->pos) * (float)(1.0/r); 
-          c += surface_tension * n;
-          k +=  other_particle->mass * 1/(other_particle->density) * w_poly_laplacian(r)/r; 
-      }
-    }
+    glm::vec3 f_e = glm::vec3(0.0, -9.8 * mass, 0.0); 
     ft = surface_tension_sigma * c * k;
-    return ft; 
+
+    return f_p + f_v + f_e + ft; 
 }
 
-
+// O(n^2)
+// 
 void updatePosition(Particle particlesContainer[]) {
+
 	PointsAdaptor f_adaptor(particlesContainer, MAX_PARTICLES);
 	Points_KD_Tree_t index(3, f_adaptor,nanoflann::KDTreeSingleIndexAdaptorParams(10));
 	index.buildIndex();
@@ -149,39 +132,39 @@ void updatePosition(Particle particlesContainer[]) {
     // Overall density might be constant but the density per particle is actually different
     #pragma omp parallel for
     for(int i = 0; i < MAX_PARTICLES; i++) {
-        density_s(&particlesContainer[i], particlesContainer);
+        density_s(&particlesContainer[i], particlesContainer, &index);
     }
 
     // force calculation
     #pragma omp parallel for
     for(int i = 0; i < MAX_PARTICLES; i++) {
-        glm::vec3 pressure_force = compute_pressure(&particlesContainer[i], particlesContainer, &index);
-        particlesContainer[i].pressure_force = pressure_force;
+        glm::vec3 net_force = compute_force(&particlesContainer[i], particlesContainer, &index);
+        particlesContainer[i].net_force = net_force;
     }
     
-    #pragma omp parallel for
-    for(int i = 0; i < MAX_PARTICLES; i++) {
-        glm::vec3 gravity_force = compute_gravity(&particlesContainer[i]);
-        particlesContainer[i].external = gravity_force;
-    }
-    #pragma omp parallel for
-    for(int i = 0; i < MAX_PARTICLES; i++) {
-        glm::vec3 surface_tension_force = compute_surface_tension(&particlesContainer[i], particlesContainer, &index);
-        particlesContainer[i].surface_tension = surface_tension_force;
-    }
+    // #pragma omp parallel for
+    // for(int i = 0; i < MAX_PARTICLES; i++) {
+    //     glm::vec3 gravity_force = compute_gravity(&particlesContainer[i]);
+    //     particlesContainer[i].external = gravity_force;
+    // }
+    // #pragma omp parallel for
+    // for(int i = 0; i < MAX_PARTICLES; i++) {
+    //     glm::vec3 surface_tension_force = compute_surface_tension(&particlesContainer[i], particlesContainer, &index);
+    //     particlesContainer[i].surface_tension = surface_tension_force;
+    // }
 
-    #pragma omp parallel for
-    for(int i = 0; i < MAX_PARTICLES; i++) {
-        glm::vec3 viscosity_force = compute_viscosity(&particlesContainer[i], particlesContainer, &index);
-        particlesContainer[i].viscosity = viscosity_force;
-    }
+    // #pragma omp parallel for
+    // for(int i = 0; i < MAX_PARTICLES; i++) {
+    //     glm::vec3 viscosity_force = compute_viscosity(&particlesContainer[i], particlesContainer, &index);
+    //     particlesContainer[i].viscosity = viscosity_force;
+    // }
 
     // Actually updating the points
     #pragma omp parallel for
     for(int i = 0; i < MAX_PARTICLES; i++) {
         Particle *particle = &particlesContainer[i];
-        glm::vec3 net_force = particle->pressure_force + particle->external + particle->external + particle->viscosity;
-        
+        // glm::vec3 net_force = particle->pressure_force + particle->external + particle->external + particle->viscosity;
+        glm::vec3 net_force = particle->net_force;
         const float volume = 1;
         const float mass = particle->density * volume; 
         
@@ -217,7 +200,6 @@ void updatePosition(Particle particlesContainer[]) {
             particle->pos.z = 1.0f;
             particle->vel.z *= -1*dampening;
         }
-
 
     }
 }
