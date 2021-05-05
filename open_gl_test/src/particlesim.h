@@ -28,9 +28,11 @@ public:
  GLuint spherePositionVbo;
  GLuint sphereIndexVbo;
  GLuint sphereNormalVbo;
+ GLuint sphereUVVbo;
  std::vector<GLuint> indices;
  std::vector<float> positions;
  std::vector<float> normals;
+ std::vector<float> uv;
 
  GLfloat* g_particule_position_size_data;
  GLfloat* g_particule_color_data;

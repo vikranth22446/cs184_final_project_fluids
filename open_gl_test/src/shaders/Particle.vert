@@ -5,6 +5,7 @@ layout(location = 0) in vec3 vertex;
 layout(location = 1) in vec4 centers; // Position of the center of the particule and size of the square
 layout(location = 2) in vec4 color; // Position of the center of the particule and size of the square
 layout(location = 3) in vec3 in_normal; // Position of the center of the particule and size of the square
+layout(location = 4) in vec2 in_uv; // Position of the center of the particule and size of the square
 
 // Values that stay constant for the whole mesh.
 uniform vec3 u_cam_pos;
@@ -21,6 +22,7 @@ float m_height_scaling = 0.1;
 out vec4 particlecolor;
 out vec4 v_position;
 out vec4 v_normal;
+out vec2 out_uv;
 
 void main()
 {	
@@ -36,7 +38,7 @@ void main()
 	// normal_out = in_normal;
 	v_position = vec4(vertex_shifted_by_center, 1.0f);
 	v_normal = vec4(in_normal, 0.0f); // directions have 0 at the last coord
-
+	out_uv = in_uv;
 	// particlecolor = vec4(u_cam_pos, 1.0f);
 }
 

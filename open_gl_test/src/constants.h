@@ -37,7 +37,8 @@ const float sphere_radius = .05;
 #define vertex_shader_file "../src/shaders/Particle.vert"
 #define fragment_shader_file  "../src/shaders/Mirror.frag"
 #define texture_shader_file "../src/textures/texture2.jpeg"
-
+// #define texture_shader_file "../src/textures/water_normal.jpg"
+// #define texture_shader_file "../src/textures/water_texture_4.jpeg"
 // #define texture_shader_file "../src/textures/water_minecraft.jpeg"
 // #define texture_shader_file "../src/textures/glass_with_water.jpeg"
 // #define texture_shader_file "../src/textures/water_texture_3.jpeg"

@@ -29,6 +29,7 @@ ParticleSim::~ParticleSim()
   glDeleteBuffers(1, &spherePositionVbo);
   glDeleteBuffers(1, &sphereIndexVbo);
   glDeleteBuffers(1, &sphereNormalVbo);
+  glDeleteBuffers(1, &sphereUVVbo);
 
   glDeleteTextures(1, &m_gl_texture_1);
   glDeleteProgram(programID);
@@ -40,21 +41,23 @@ void createSphere(
   std::vector<float> &positions,
   std::vector<GLuint> &indices, 
   std::vector<float> &normals,
+  std::vector<float> &uv,
   GLuint &spherePositionVbo, 
   GLuint &sphereIndexVbo,
-  GLuint &sphereNormalVbo
+  GLuint &sphereNormalVbo,
+  GLuint &sphereUVVbo
   )
 {
   int stacks = 20;
   int slices = 20;
   const float radius = sphere_radius;
-
+// https://stackoverflow.com/questions/31799670/applying-map-of-the-earth-texture-a-sphere/31804515#31804515
   // loop through stacks.
   for (int i = 0; i <= stacks; ++i)
   {
 
     float V = (float)i / (float)stacks;
-    float phi = V * PI;
+    float phi = (V - .5) * PI;
 
     // loop through the slices.
     for (int j = 0; j <= slices; ++j)
@@ -63,14 +66,24 @@ void createSphere(
       float U = (float)j / (float)slices;
       float theta = U * (PI * 2);
 
-      // use spherical coordinates to calculate the positions.
-      float x = cos(theta) * sin(phi) * radius;
-      float y = cos(phi) * radius;
-      float z = sin(theta) * sin(phi) * radius;
+      float b = phi;
+      float a = theta;
 
+      // use spherical coordinates to calculate the positions.
+      // float x = cos(theta) * sin(phi) * radius;
+      // float y = cos(phi) * radius;
+      // float z = sin(theta) * sin(phi) * radius;
+      float x = cos(b) * cos(a) * radius;
+      float y = cos(b) * sin(a) * radius;
+      float z = sin(b) * radius;
       positions.push_back(x);
       positions.push_back(y);
       positions.push_back(z);
+      
+      uv.push_back(a/(2*PI));
+      uv.push_back(b/PI + .5);
+      // tx=a/(2.0*PI)
+      // ty=(b/PI)+0.5;
 
       // TODO: idk if this actually how normals work, but it seems to work. Need to check over this sometime
       glm::vec3 v = glm::vec3(x, y, z);
@@ -106,6 +119,10 @@ void createSphere(
   glBindBuffer(GL_ARRAY_BUFFER, sphereNormalVbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * normals.size(), normals.data(), GL_STATIC_DRAW);
 
+  glGenBuffers(1, &sphereUVVbo);
+  glBindBuffer(GL_ARRAY_BUFFER, sphereUVVbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * uv.size(), uv.data(), GL_STATIC_DRAW);
+
   // sphereIndexCount = indices.size();
 }
 
@@ -136,9 +153,11 @@ void ParticleSim::init()
   this->positions, 
   this->indices, 
   this->normals,
+  this->uv,
   this->spherePositionVbo,
   this->sphereIndexVbo,
-  this->sphereNormalVbo);
+  this->sphereNormalVbo,
+  this->sphereUVVbo);
 
   glGenBuffers(1, &particles_position_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
@@ -164,7 +183,7 @@ void ParticleSim::init()
   for (int i = 0; i < MAX_PARTICLES; i++)
   {
     int particleIndex = i;
-    this->particlesContainer[particleIndex].pos = glm::vec3(randfloat() * BOX_SIZE, randfloat() * BOX_SIZE * 1.5, randfloat() * BOX_SIZE);
+    this->particlesContainer[particleIndex].pos = glm::vec3(randfloat() * BOX_SIZE*.5, randfloat() * BOX_SIZE * 1.5, randfloat() * BOX_SIZE);
     this->particlesContainer[particleIndex].vel = glm::vec3(0.0f);
     this->particlesContainer[particleIndex].mass = particle_inital_mass;
     
@@ -299,7 +318,17 @@ void ParticleSim::drawContents()
   // glUniform3f(CameraUp_worldspace_ID, ViewMatrix[0][1], ViewMatrix[1][1], ViewMatrix[2][1]);
 
   // glUniformMatrix4fv(ViewProjMatrixID, 1, GL_FALSE, &ViewProjectionMatrix[0][0]);
-
+  glEnableVertexAttribArray(4);
+  glBindBuffer(GL_ARRAY_BUFFER, sphereUVVbo);
+  glVertexAttribPointer(
+      4,        // attribute. No particular reason for 0, but must match the layout in the shader.
+      2,        // size
+      GL_FLOAT, // type
+      GL_FALSE, // normalized?
+      0,        // stride
+      (void *)0 // array buffer offset
+  );
+  
   glEnableVertexAttribArray(3);
   glBindBuffer(GL_ARRAY_BUFFER, sphereNormalVbo);
   glVertexAttribPointer(
