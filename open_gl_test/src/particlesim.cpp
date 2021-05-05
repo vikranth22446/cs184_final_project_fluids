@@ -563,11 +563,16 @@ void ParticleSim::mouseLeftDragged(double x, double y) {
   } else {
     bool external_mouse_force_enabled = true;
     glm::vec2 current_xy = glm::vec2(x/screen_w, y/screen_h);
-    glm::vec2 current_dxdy = normalize(glm::vec2(dx, dy));
+    glm::vec2 current_dxdy = normalize(glm::vec2(dx/screen_w, dy/screen_h));
 
+    glm::mat4 inverse_view_proj = glm::inverse(getProjectionMatrix() * getViewMatrix());
+    glm::vec4 current_xy_model_space = inverse_view_proj*glm::vec4(current_xy, 0.0, 1.0);
+    glm::vec4 current_dxy_model_space = inverse_view_proj*glm::vec4(current_dxdy, 0.0, 1.0);
+
+    this->external_force->num_iterations = num_external_force_iterations;
     this->external_force->external_mouse_force_enabled = true;
-    this->external_force->current_starting_force = current_xy;
-    this->external_force->current_dxdy = current_dxdy;
+    this->external_force->current_starting_force = glm::vec3(current_xy_model_space.x, current_xy_model_space.y,current_xy_model_space.z);
+    this->external_force->current_dxdy =  glm::vec3(current_dxy_model_space.x, current_dxy_model_space.y,current_dxy_model_space.z);
   }
 }
 
@@ -590,9 +595,14 @@ void ParticleSim::mouseRightDragged(double x, double y) {
     glm::vec2 current_xy = glm::vec2(x/screen_w, y/screen_h);
     glm::vec2 current_dxdy = normalize(glm::vec2(dx/screen_w, dy/screen_h));
 
+    glm::mat4 inverse_view_proj = glm::inverse(getProjectionMatrix() * getViewMatrix());
+    glm::vec4 current_xy_model_space = inverse_view_proj*glm::vec4(current_xy, 0.0, 1.0);
+    glm::vec4 current_dxy_model_space = inverse_view_proj*glm::vec4(current_dxdy, 0.0, 1.0);
+
+    this->external_force->num_iterations = num_external_force_iterations;
     this->external_force->external_mouse_force_enabled = true;
-    this->external_force->current_starting_force = glm::vec2(x/screen_w, y/screen_h);
-    this->external_force->current_dxdy = current_dxdy;
+    this->external_force->current_starting_force = glm::vec3(current_xy_model_space.x, current_xy_model_space.y,current_xy_model_space.z);
+    this->external_force->current_dxdy =  glm::vec3(current_dxy_model_space.x, current_dxy_model_space.y,current_dxy_model_space.z);
   }
 }
 

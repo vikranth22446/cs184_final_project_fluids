@@ -15,8 +15,9 @@ struct Particle {
     glm::vec3 surface_tension;
 };
 struct ExternalForce {
-  glm::vec2 current_starting_force;
-  glm::vec2 current_dxdy;
+  glm::vec3 current_starting_force;
+  glm::vec3 current_dxdy;
   bool external_mouse_force_enabled = false;
+  int num_iterations = 0;
 };
 #endif /* PARTICLES_H */

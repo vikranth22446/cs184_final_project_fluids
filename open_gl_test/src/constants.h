@@ -3,7 +3,7 @@
 #include <string>
 #include "glm/glm.hpp"
 
-const int MAX_PARTICLES = 5000;
+const int MAX_PARTICLES = 4000;
 
 // https://www.engineeringtoolbox.com/surface-tension-d_962.html
 // const float surface_tension_sigma =  0.0728;
@@ -32,6 +32,8 @@ const float delta_t = 1.0/60.0;
 const float dampening = .65;
 const float BOX_SIZE = 1.5;
 const float sphere_radius = .05;
+
+const int num_external_force_iterations = 5;
 
 // TODO figure out better way to add const* strings instead of #define for type safety. 
 #define vertex_shader_file "../src/shaders/Particle.vert"

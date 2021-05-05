@@ -118,10 +118,14 @@ glm::vec3 compute_force(Particle *particle, Particle particlesContainer[], Point
     ft = surface_tension_sigma * c * k;
     
     if(external_force->external_mouse_force_enabled ) {
-        double r = glm::length(glm::vec2(particle->pos.x, particle->pos.y) - external_force->current_starting_force);
+        double r = glm::dot(particle->pos, external_force->current_starting_force)/(glm::length(external_force->current_starting_force) * glm::length(particle->pos));
+        // double r = glm::length(glm::normalize(particle->pos) - glm::normalize(external_force->current_starting_force));
+        glm::vec3 n = external_force->current_dxdy;
+        
+        printf("%f\n", r);
         if (r < .3) {
             // glm::vec3 n = glm::vec3(external_force->current_dxdy, 1.0);
-            f_e +=  glm::vec3(0.0, 10 * 9.8 * mass, 0.0);  
+            f_e +=  n * mass * 10.0f;  
         }
         // f_e += external_force->current_xyz
     }
@@ -150,8 +154,11 @@ void updatePosition(Particle particlesContainer[], ExternalForce *external_force
         glm::vec3 net_force = compute_force(&particlesContainer[i], particlesContainer, &index, external_force);
         particlesContainer[i].net_force = net_force;
     }
-    external_force->external_mouse_force_enabled = false;
-
+    if(external_force->num_iterations != 0) {
+        external_force->num_iterations -= 1;
+    } else {
+        external_force->external_mouse_force_enabled = false;
+    }
     // #pragma omp parallel for
     // for(int i = 0; i < MAX_PARTICLES; i++) {
     //     glm::vec3 gravity_force = compute_gravity(&particlesContainer[i]);
@@ -180,12 +187,15 @@ void updatePosition(Particle particlesContainer[], ExternalForce *external_force
         
         // Implicit Euler to compute next time step first
         glm::vec3 new_vel = particle->vel + net_force/mass * delta_t;
+        new_vel = glm::clamp(new_vel, glm::vec3(-8, -8, -8), glm::vec3(8, 8, 8));
+
         glm::vec3 new_pos = particle->pos + new_vel * delta_t;
         // printf("Netforce %f, %f,%f\n", (net_force/mass * delta_t).x,  (net_force/mass * delta_t).y,  (net_force/mass).z);
 
         particlesContainer[i].vel = new_vel;
         particlesContainer[i].pos = new_pos;
-
+        
+        // printf("%f, %f, %f\n", new_vel.x, new_vel.y, new_vel.z);
         if(particle->pos.x < -1.5) {
             particle->pos.x = -1.5f;
             particle->vel.x *= -1*dampening;

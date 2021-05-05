@@ -27,7 +27,7 @@ void main() {
   // texture only accepts the 3d vector for wi
 //   wi_3 = vec2(.5, .5);
   // wi_3 = out_uv ;
-  wi_3 = clamp(wi_3, 0.0, 1.0); 
+  // wi_3 = clamp(wi_3, 0.0, 1.0); 
 
   color = texture(u_texture_1, wi_3);
 
