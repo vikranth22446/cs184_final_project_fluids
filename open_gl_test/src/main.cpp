@@ -71,7 +71,7 @@ void usageHelp() {
   printf("Required keyboard options:\n");
   printf("   r/R               Reset.\n");
   printf("   p/P               Pause.\n");
-  printf("   w/W               Enable/Disable Camera.\n");
+  printf("   w/W               Enable/Disable Whirlpool.\n");
   printf("   c/C               Enable/Disable Camera. Disabling camera allows for interaction.\n");
   printf("Change constants.h to try different paramaters.\n");
 }
