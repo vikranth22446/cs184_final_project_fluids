@@ -61,6 +61,7 @@ public:
 
   virtual Matrix4f  getProjectionMatrix4f();
   virtual Matrix4f getViewMatrix4f();
+  void reset();
  private:
   virtual void initGUI(Screen *screen);
   void load_shaders();

@@ -66,6 +66,15 @@ void createGLContexts()
 	glfwSwapBuffers(window);
 }
 
+void usageHelp() {
+  printf("Usage: FluidSim\n");
+  printf("Required keyboard options:\n");
+  printf("   r/R               Reset.\n");
+  printf("   p/P               Pause.\n");
+  printf("   w/W               Enable/Disable Camera.\n");
+  printf("   c/C               Enable/Disable Camera. Disabling camera allows for interaction.\n");
+  printf("Change constants.h to try different paramaters.\n");
+}
 void setGLFWCallbacks()
 {
 	glfwSetCursorPosCallback(window, [](GLFWwindow *, double x, double y) {
@@ -119,6 +128,7 @@ void setGLFWCallbacks()
 
 int main(void)
 {
+	usageHelp();
 	// testPointCloud();
 	// Initialise GLFW
 	glfwSetErrorCallback(error_callback);
@@ -165,8 +175,7 @@ int main(void)
 		lastTime = currentTime;
 		nbFrames++;
 		if (currentTime - lastFPSTime >= 1.0)
-		{ // If last prinf() was more than 1 sec ago
-			// printf and reset timer
+		{ 
 			printf("ms/frame: %f fps: %f\n", 1000.0 / double(nbFrames), double(nbFrames) / 1);
 			nbFrames = 0;
 			lastFPSTime += 1.0;

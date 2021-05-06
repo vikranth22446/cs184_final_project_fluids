@@ -239,7 +239,21 @@ bool ParticleSim::isAlive() { return is_alive; }
 void ParticleSim::initGUI(Screen *screen)
 {
 }
-
+void ParticleSim::reset() {
+  for (int i = 0; i < MAX_PARTICLES; i++)
+  {
+    int particleIndex = i;
+    this->particlesContainer[particleIndex].pos = glm::vec3(randfloat() * BOX_SIZE*.5, randfloat() * BOX_SIZE * 1.5, randfloat() * BOX_SIZE);
+    this->particlesContainer[particleIndex].vel = glm::vec3(0.0f);
+    this->particlesContainer[particleIndex].mass = particle_inital_mass;
+    
+    this->particlesContainer[particleIndex].red = 1.0;
+    this->particlesContainer[particleIndex].green = 0.0;
+    this->particlesContainer[particleIndex].blue = 0.0;
+    this->particlesContainer[particleIndex].alpha = 1.0;
+    this->particlesContainer[particleIndex].size = .2;
+  }
+}
 void ParticleSim::drawContents()
 {
   if(!is_paused) {
@@ -618,6 +632,8 @@ bool ParticleSim::keyCallbackEvent(int key, int scancode, int action,
     case 'r':
     case 'R':
       // cloth->reset();
+      printf("Reset orientation \n");
+      reset();
       break;
     case ' ':
       resetCamera();
@@ -625,10 +641,17 @@ bool ParticleSim::keyCallbackEvent(int key, int scancode, int action,
     case 'p':
     case 'P':
       is_paused = !is_paused;
+      printf("Current Paused %d\n", is_paused);
+      break;
+    case 'w':
+    case 'W':
+      this->external_force->external_mouse_force_enabled = !this->external_force->external_mouse_force_enabled;
+      printf("External force enabled %d\n", this->external_force->external_mouse_force_enabled);
       break;
     case 'c':
     case 'C':
       pause_camera = !pause_camera;
+      printf("Interaction Enabled %d\n", !pause_camera);
       break;
     case 'n':
     case 'N':
