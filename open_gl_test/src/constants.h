@@ -38,9 +38,9 @@ const bool whirlpool_enabled = false;
 
 // TODO figure out better way to add const* strings instead of #define for type safety. 
 #define vertex_shader_file "../src/shaders/Particle.vert"
-#define fragment_shader_file  "../src/shaders/Mirror.frag"
+#define fragment_shader_file  "../src/shaders/Mirror2.frag"
 // #define texture_shader_file "../src/textures/water_normal.jpg"
-#define texture_shader_file "../src/textures/texture2.jpeg"
+#define texture_shader_file "../src/textures/texture2.jpg"
 // #define texture_shader_file "../src/textures/water_minecraft.jpeg"
 // #define texture_shader_file "../src/textures/glass_with_water.jpeg"
 // #define texture_shader_file "../src/textures/water_texture_3.jpeg"
