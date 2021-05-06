@@ -645,8 +645,8 @@ bool ParticleSim::keyCallbackEvent(int key, int scancode, int action,
       break;
     case 'w':
     case 'W':
-      this->external_force->external_mouse_force_enabled = !this->external_force->external_mouse_force_enabled;
-      printf("External force enabled %d\n", this->external_force->external_mouse_force_enabled);
+      this->external_force->whirlpool_enabled = !this->external_force->whirlpool_enabled;
+      printf("External force enabled %d\n", this->external_force->whirlpool_enabled);
       break;
     case 'c':
     case 'C':
