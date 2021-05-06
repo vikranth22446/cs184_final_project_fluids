@@ -19,5 +19,7 @@ struct ExternalForce {
   glm::vec3 current_dxdy;
   bool external_mouse_force_enabled = false;
   int num_iterations = 0;
+
+  bool whirlpool_enabled = false;
 };
 #endif /* PARTICLES_H */

@@ -127,7 +127,7 @@ glm::vec3 compute_force(Particle *particle, Particle particlesContainer[], Point
         }
     }
 
-    if(whirlpool_enabled) {
+    if(external_force->whirlpool_enabled) {
         glm::vec3 axis = glm::normalize(glm::vec3(1, 0, 0));
         float r = glm::dot(particle->pos, axis);
         glm::vec3 n = glm::vec3(1, 0, 1);

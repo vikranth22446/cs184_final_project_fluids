@@ -20,8 +20,8 @@ On Windows:
 
 
 References:
-- nano-gui: used to render text and buttons on the screen easily
-    - We choose not to let shaders be managed through it and instead use a custom solution since we found it required less boilerplate
+- nano-gui: used to get mouse position and callbacks
+    - We choose not to let shaders be managed through it for performance reasons
 - https://github.com/opengl-tutorials/ogl tutorials on how basic open gl works
     - helpful in understanding how array instantiated, vertex indexing works
 - Proj4 clothsim: helpful for setting up camera code + views and mouse callbacks

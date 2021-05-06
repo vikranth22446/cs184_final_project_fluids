@@ -34,7 +34,6 @@ const float BOX_SIZE = 1.5;
 const float sphere_radius = .05;
 
 const int num_external_force_iterations = 5;
-const bool whirlpool_enabled = false;
 
 // TODO figure out better way to add const* strings instead of #define for type safety. 
 #define vertex_shader_file "../src/shaders/Particle.vert"
