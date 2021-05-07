@@ -60,6 +60,10 @@ function App() {
     Include info about user interaction
     <Row><h5>Optimizations</h5></Row>
     <Row><h5>Shaders</h5></Row>
+    <Row><p>
+      We applied the Mirror and regular shader implemented in project 4 with a slight variation being that we bind a water texture using uv coordinates. To do this, we create our own sphere mesh, add the necessary
+      info for each vertex including details such as the normals for lighting, texture coordinates, vertex positions, etc. Then all this is sent to OpenGL for our particles (spheres) to be rendered.
+      </p></Row>
     <Row><h2>Results</h2></Row>
     <Row><ReactPlayer
       url="https://youtu.be/-6NWf9phIio"
