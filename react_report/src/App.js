@@ -39,14 +39,16 @@ function App() {
        The sections below describe the technical approaches and advantages of our approaches</p></Row>
     <Row><h5>Initial Framework: Three.js</h5></Row>
     <Row><p>
-      Three.js offers a lot of easy integrations into a scene such as options to specify where to place the camera, directional light, ambient light, etc. It also helps with applying shaders as
-      they have several built-in including a Phong shader. We saw examples from previous semesters such as smoke simulators with user interaction built on the three.js framework. It seemed to be
-      ver versatile and powerful.
+      Three.js is a cross-browser library and API that can help developers create and display graphics using WebGL.
+      It offers a lot of easy integrations into a scene such as options to specify where to place the camera, directional light, ambient light, etc. It also helps with applying shaders as
+      they have several built-in including a Phong shader.
 
-      Up to our project milestone, we had a working physics simulation for our particle system as well as a custom Blinn-Phong shader. During our test runs we noticed that performance was not ideal.
+      Up to our project milestone, we had a working physics simulation for our particle system as well as a custom Blinn-Phong shader. During our test runs we noticed that performance was not addequate for realistic
+      3d fluid simulation. For a realistic simulation, the goal is to have at least 2,000 particles at a consistent framerate. As a reference, the paper we read uses 5,000 particles.
       Our simulations ran at very low frame rates: 100 particles ran at 45-60 fps and 300 particles ran at 1-3 fps.
 
-      We considered the value of offloading computational logic to Golang using web assembly but decided that it may be faster to start over using C++.
+      We considered the value of offloading computational logic to Golang using web assembly but after testing with it, web assembly didn't seem to provide the easy integration we sought. Thus, we decided that it may be
+      faster to start over using C++.
       </p></Row>
     <Row><h5>Current Framework: C++ and OpenGL</h5></Row>
     <Row><p>
