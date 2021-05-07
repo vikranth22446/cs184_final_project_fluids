@@ -14,7 +14,12 @@ function App() {
     <Navbar.Brand><h2>3D Interactive Fluid Simulation Report</h2></Navbar.Brand>
 
   </Navbar>
-    <Navbar.Brand><h4>Vikranth Srivatsa, Bhuvan Basireddy, Kevin Lo, Benjamin Cheung</h4></Navbar.Brand>
+  <Container>
+  <Row><Navbar.Brand>
+      <h4>Vikranth Srivatsa, Bhuvan Basireddy, Kevin Lo, Benjamin Cheung</h4>
+    </Navbar.Brand></Row>
+    <img src="logo.png" class="center"></img>
+  </Container>
   <br />
   <Container>
     <Row><h2>Abstract</h2></Row>
