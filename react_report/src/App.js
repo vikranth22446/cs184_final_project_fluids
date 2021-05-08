@@ -1,14 +1,11 @@
-import logo from './logo.svg';
 import './App.css';
 import Navbar from 'react-bootstrap/Navbar'
 import Row from 'react-bootstrap/Row'
 import Container from 'react-bootstrap/Container'
-import Col from 'react-bootstrap/Col'
-import React, { useState } from 'react';
+import React from 'react';
 import ReactPlayer from "react-player"
 var Latex = require('react-latex');
-const density_eq = 'We give illustrations for the three processes $e^+e^-$, gluon-gluon and $\\gamma\\gamma \\to W t\\bar b$.'
-// const viscosity = `$\\mu * \\sum_j * mass_j * \\frac{v_j - v_i}{density_j} * laplaceW(r_i - r_j, h)`
+
 function App() {
   return (
     <div>
@@ -103,14 +100,14 @@ function App() {
     <Row><p>To compute viscosity, we use the formula  <Latex>{`$\\mu * \\sum_j * mass_j * \\frac{v_j - v_i}{density_j} * laplaceW(r_i - r_j, h)$`}</Latex> 
     </p></Row>
     <Row><p><Latex>{`To compute pressure, $-\\sum_j * mass_j * \\frac{(density_i + density_j)}{(2 * density_j)} * \\nabla W(r_i, r_j)$`}</Latex> </p></Row>
-    <Row><p><Latex>{`To compute surface tension, we compute $\\sigma * k * n = \\sigma * \\delta^2 * c_s * \\frac{n}{|n|}$ where c_s is $\\sum_{j} mass_j * \\frac{1}\{density_j} * W(r - r_j, h)$ and $k = \\sum_{j} mass_j * \\frac{1}{density_j} * \\nabla^2 W(r - r_j, h)$`}</Latex> 
+    <Row><p><Latex>{`To compute surface tension, we compute $\\sigma * k * n = \\sigma * \\delta^2 * c_s * \\frac{n}{|n|}$ where c_s is $\\sum_{j} mass_j * \\frac{1}{density_j} * W(r - r_j, h)$ and $k = \\sum_{j} mass_j * \\frac{1}{density_j} * \\nabla^2 W(r - r_j, h)$`}</Latex> 
     </p></Row>
     <Row><p> To compute gravity, we add the force <Latex>$(0, -9.8, 0)$</Latex></p></Row>
     
     <Row><p> The weight kernels we used were the weight kernel with the parmaters r, h which are distance and kernel paramater. 
     <Latex>{`$W_{poly6} = \\frac{315}{64 * pi * h^9} *((h^2 - r^2)^3 \\text{ if } 0 <= r <= h \\text{ else } 0)$`}</Latex> for everything except surface tension and viscosity. 
     Kernel used for surface tension <Latex>{`$W_{spiky} = \\frac{15}{pi * h^6} * ((h-r)^3 \\text{ if } 0 <= r <= h \\text{ else } 0)$`}</Latex>. 
-    Kernel used for viscosity <Latex>{"$W_{viscosity} = \\frac{15\}\{2 * pi * h^3} * (-\\frac{r^3}{2*h^3} + \\frac{r^2}{h^2} + \\frac{h}{2*r} - 1 \\text{ if } 0 <= r <= h \\text{ else } 0)$"}</Latex>
+    Kernel used for viscosity <Latex>{"$W_{viscosity} = \\frac{15\}{2 * pi * h^3} * (-\\frac{r^3}{2*h^3} + \\frac{r^2}{h^2} + \\frac{h}{2*r} - 1 \\text{ if } 0 <= r <= h \\text{ else } 0)$"}</Latex>
     </p></Row>
 
     <Row><p> To create user interaction, we took the mouse position and the detla formed with the mouse movement. Then computed the inverse of the camera and projection matrices. 
