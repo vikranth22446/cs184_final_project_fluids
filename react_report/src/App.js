@@ -201,32 +201,26 @@ function App() {
       </table> 
     </Row>
     <Row>
-      <table className="player_videos_table">
-        <tr>
-          <td className="player_table_internal">
-            <ReactPlayer
-          controls={true}
-          url="https://youtu.be/-6NWf9phIio"/>
-          </td>
-          <td>
-            <ReactPlayer
-          controls={true}
-          url="https://youtu.be/2OVFJwOe9lU"/>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <ReactPlayer
-          controls={true}
-          url="https://youtu.be/ssmsc0edW8E"/>
-          </td>
-          <td>
-            <ReactPlayer
-          controls={true}
-          url="https://www.youtube.com/watch?v=Ve3xhCWj_q8"/>
-          </td>
-        </tr>
-      </table>
+      <ReactPlayer
+        width="50%"
+        controls={true}
+        url="https://www.youtube.com/watch?v=-6NWf9phIio"/>
+      <ReactPlayer
+        width="50%"
+        controls={true}
+        url="https://www.youtube.com/watch?v=2OVFJwOe9lU"/>
+    </Row>
+    <br></br>
+    <br></br>
+    <Row>
+    <ReactPlayer
+      width="50%"
+      controls={true}
+      url="https://www.youtube.com/watch?v=ssmsc0edW8E"/>
+    <ReactPlayer
+      width="50%"
+      controls={true}
+      url="https://www.youtube.com/watch?v=Ve3xhCWj_q8"/>
     </Row>
 </Container>
   </div>
