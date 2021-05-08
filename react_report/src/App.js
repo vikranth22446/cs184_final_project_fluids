@@ -1,15 +1,18 @@
+import logo from "./logo.png"
+import arch_diagram from "./arch.jpg"
+
 import './App.css';
 import Navbar from 'react-bootstrap/Navbar'
 import Row from 'react-bootstrap/Row'
 import Container from 'react-bootstrap/Container'
 import React from 'react';
-import ReactPlayer from "react-player"
+import ReactPlayer from 'react-player/youtube'
 var Latex = require('react-latex');
 
 function App() {
   return (
     <div>
-  <Navbar bg="dark" variant="dark" class="shadow p-3 mb-5 bg-body rounded">
+  <Navbar bg="dark" variant="dark" className=" rounded">
     <Navbar.Brand><h2>3D Interactive Fluid Simulation Report</h2></Navbar.Brand>
 
   </Navbar>
@@ -17,7 +20,7 @@ function App() {
   <Row><Navbar.Brand>
       <h4>Vikranth Srivatsa, Bhuvan Basireddy, Kevin Lo, Benjamin Cheung</h4>
     </Navbar.Brand></Row>
-    <img src="logo.png" class="center"></img>
+    <img src={logo} className="center" alt="logo for fluids"></img>
   </Container>
   <br />
   <Container>
@@ -61,7 +64,7 @@ function App() {
     <Row><p>
       A good overview of framework is provided in the image below.
       </p></Row>
-    <Row>    <img src="arch_diagram.jpg" class="arch_diagram"></img></Row>
+    <Row>    <img src={arch_diagram} className="arch_diagram" alt="Architecture diagram describing flow of logic"></img></Row>
     <Row><b>Rendering Loop and Logic</b></Row>
     <Row><p>
       The general rendering loop followed initializing the window, the shaders, the textures, and repeatedly drawing updates to the rendering logic in a loop. 
@@ -107,7 +110,7 @@ function App() {
     <Row><p> The weight kernels we used were the weight kernel with the parmaters r, h which are distance and kernel paramater. 
     <Latex>{`$W_{poly6} = \\frac{315}{64 * pi * h^9} *((h^2 - r^2)^3 \\text{ if } 0 <= r <= h \\text{ else } 0)$`}</Latex> for everything except surface tension and viscosity. 
     Kernel used for surface tension <Latex>{`$W_{spiky} = \\frac{15}{pi * h^6} * ((h-r)^3 \\text{ if } 0 <= r <= h \\text{ else } 0)$`}</Latex>. 
-    Kernel used for viscosity <Latex>{"$W_{viscosity} = \\frac{15\}{2 * pi * h^3} * (-\\frac{r^3}{2*h^3} + \\frac{r^2}{h^2} + \\frac{h}{2*r} - 1 \\text{ if } 0 <= r <= h \\text{ else } 0)$"}</Latex>
+    Kernel used for viscosity <Latex>{"$W_{viscosity} = \\frac{15}{2 * pi * h^3} * (-\\frac{r^3}{2*h^3} + \\frac{r^2}{h^2} + \\frac{h}{2*r} - 1 \\text{ if } 0 <= r <= h \\text{ else } 0)$"}</Latex>
     </p></Row>
 
     <Row><p> To create user interaction, we took the mouse position and the detla formed with the mouse movement. Then computed the inverse of the camera and projection matrices. 
@@ -134,12 +137,21 @@ function App() {
       </p></Row>
     <Row><h2>Results</h2></Row>
     <Row><p>Simulation Params that we tweaked to make it more realistic water for our simulation is listed below.
-        <table>
+    </p>
+    </Row>
+    <Row><p>The following are some results that we recieved from our implementation. We ran at 4000 particles at 12-15fps.
+     This is very close to the particle count of 5000 mentioned in the paper with a stable fps</p>
+     </Row>
+    <Row>
+    <table className="data-table">
+          <thead>
         <tr>
-          <th>Paramater Name</th>
-          <th>Paramater Value</th>
-          <th>Paramater Description</th>
+          <th> Name</th>
+          <th> Value </th>
+          <th> Description</th>
         </tr>
+        </thead>
+        <tbody>
         <tr>
           <td>h</td>
           <td>.5</td>
@@ -185,24 +197,37 @@ function App() {
           <td>5</td>
           <td>The number of iterations to apply the mouse force over.</td>
         </tr>
+        </tbody>
       </table> 
-    </p>
     </Row>
-    <Row><p>The following are some results that we recieved from our implementation. We ran at 4000 particles at 12-15fps.
-     This is very close to the particle count of 5000 mentioned in the paper with a stable fps</p></Row>
-    <Row><ReactPlayer
-      url="https://youtu.be/-6NWf9phIio"
-    />
-     <ReactPlayer
-      url="https://youtu.be/ssmsc0edW8E"
-    /></Row>
-    <br></br>
-    <br></br>
-     <Row><ReactPlayer
-      url="https://youtu.be/2OVFJwOe9lU"
-    /><ReactPlayer
-      url="https://www.youtube.com/watch?v=Ve3xhCWj_q8"
-    /></Row>
+    <Row>
+      <table className="player_videos_table">
+        <tr>
+          <td className="player_table_internal">
+            <ReactPlayer
+          controls={true}
+          url="https://youtu.be/-6NWf9phIio"/>
+          </td>
+          <td>
+            <ReactPlayer
+          controls={true}
+          url="https://youtu.be/2OVFJwOe9lU"/>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <ReactPlayer
+          controls={true}
+          url="https://youtu.be/ssmsc0edW8E"/>
+          </td>
+          <td>
+            <ReactPlayer
+          controls={true}
+          url="https://www.youtube.com/watch?v=Ve3xhCWj_q8"/>
+          </td>
+        </tr>
+      </table>
+    </Row>
 </Container>
   </div>
   );

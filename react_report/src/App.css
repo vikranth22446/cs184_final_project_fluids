@@ -66,4 +66,16 @@
   object-fit: contain;
   width: auto;
   max-height: 800px;
-   }
+}
+
+.player_videos_table, .data-table{
+  margin: 8px;
+}
+
+.player_table_internal {
+  padding-right: 8px;
+  padding-bottom: 8px;
+}
+body {
+  padding-bottom: 50px;
+}

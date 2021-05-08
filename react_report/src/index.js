@@ -1,3 +1,4 @@
+import logo from "./logo.png"
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
@@ -11,6 +12,14 @@ ReactDOM.render(
     <App />
   </React.StrictMode>,
   document.getElementById('root')
+);
+ReactDOM.render(
+  <React.StrictMode>
+    <div>
+      <link id="logo" rel="apple-touch-icon" href={logo} />
+    </div>
+  </React.StrictMode>,
+  document.getElementById('logo')
 );
 
 // If you want to start measuring performance in your app, pass a function
