@@ -71,18 +71,18 @@ function App() {
       <br></br>
       <br></br>
       To render the sphere, we used the stacks and slices approach to determine the vertices and normals as shown by https://www.songho.ca/opengl/gl_sphere.html. 
-      This involes iterates through different angles at <Latex>{`$phi = \\frac{stack_{iteration}}{stacks} - .5) * .5 * PI$`}</Latex> and different <Latex>{`$theta = (2 * PI * slice_iteration/slices)$`}</Latex>.
+      This involes iterates through different angles at <Latex>{`$phi = (\\frac{stack_{iteration}}{stacks} - .5) * .5 * PI$`}</Latex> and different <Latex>{`$theta = 2 * PI * \\frac{slice_{iteration}}{slices}$`}</Latex>.
       Then, given those two angles we can use the spherical coordinates to derive the position of the vertices of the spheres. We compute the normals by normalizing these vector operations.
       By providing a single sphere with vertices to the shader, we can dramatically reduce the computation cost.
       <br></br>
       <br></br>
       In order to further reduce the computational cost, we use the idea of vertex indexing, which prevents repeated vertices from being sent to the shader when rendering the triangles that make up the sphere. 
-      We also draw and instatinate all particle positions all at once using glDrawElementsInstanced, which sends the data to the shader in a single mesh instead of multiple meshes, which significantly boosts rendering performance. 
+      We also draw and instantiate all particle positions all at once using glDrawElementsInstanced, which sends the data to the shader in a single mesh instead of multiple meshes, which significantly boosts rendering performance. 
       For our implementation, we use 20 stacks and 20 slices.  
       With some manual openGL binding, we are able to send these to shader and also render the relevant values. 
       <br></br>
       <br></br>
-      Another important aspect of rendering is using the correct proejection matrix to view the data. In order to setup the camera and projection matrices, we took inspiration from proj4-clothsim management of the camera.
+      Another important aspect of rendering is using the correct projection matrix to view the data. In order to setup the camera and projection matrices, we took inspiration from proj4-clothsim management of the camera.
       <br></br>
       <br></br>
       One aspect of rendering that optimized our binding is to manually bind open gl buffer and vertex attributes such as normals. 
@@ -95,9 +95,9 @@ function App() {
     </p>
     </Row>
     <Row><p> For each particle, we compute the density for a single particle via <Latex>{`$\\sum_j mass_j * W(r - r_j, h)$`}</Latex>
-             where W is a weight kernel and r is the vector distance of praticle. We discuss the different kernels later </p>
+             where W is a weight kernel and r is the vector distance of particle. We discuss the different kernels later </p>
     </Row>
-    <Row><p> Since the local density of each particle is differnet than the global density, we have to use a density function. 
+    <Row><p> Since the local density of each particle is different than the global density, we have to use a density function. 
     For each of the particles, we then compute the forces that are applied to it. The relevant forces are surface tension, pressure, viscosity, gravity, and other external forces.</p></Row>
     
     <Row><p>To compute viscosity, we use the formula  <Latex>{`$\\mu * \\sum_j * mass_j * \\frac{v_j - v_i}{density_j} * laplaceW(r_i - r_j, h)$`}</Latex> 
@@ -107,7 +107,7 @@ function App() {
     </p></Row>
     <Row><p> To compute gravity, we add the force <Latex>$(0, -9.8, 0)$</Latex></p></Row>
     
-    <Row><p> The weight kernels we used were the weight kernel with the parmaters r, h which are distance and kernel paramater. 
+    <Row><p> The weight kernels we used were the weight kernel with the paramaters r, h which are distance and kernel paramater. 
     <Latex>{`$W_{poly6} = \\frac{315}{64 * pi * h^9} *((h^2 - r^2)^3 \\text{ if } 0 <= r <= h \\text{ else } 0)$`}</Latex> for everything except surface tension and viscosity. 
     Kernel used for surface tension <Latex>{`$W_{spiky} = \\frac{15}{pi * h^6} * ((h-r)^3 \\text{ if } 0 <= r <= h \\text{ else } 0)$`}</Latex>. 
     Kernel used for viscosity <Latex>{"$W_{viscosity} = \\frac{15}{2 * pi * h^3} * (-\\frac{r^3}{2*h^3} + \\frac{r^2}{h^2} + \\frac{h}{2*r} - 1 \\text{ if } 0 <= r <= h \\text{ else } 0)$"}</Latex>
@@ -120,7 +120,7 @@ function App() {
     <Row><h5>Optimizations</h5></Row>
     <Row><p
     >We spent a lot of time optimizing our code since we wanted to achieve a large number of particles and similiar results to the paper we are referencing. We first used the valgrind profiling to track areas of the c++ code that required the most optimization. 
-    The physics simulation in our case was taking most of the time in serial fashion. We started by optimizing thsi code to take advantage of cache locality and using threads to run each particles computation in parallel. This provided a great speed up of 3-4x. 
+    The physics simulation in our case was taking most of the time in serial fashion. We started by optimizing the code to take advantage of cache locality and using threads to run each particles computation in parallel. This provided a great speed up of 3-4x. 
     In order to visualize our performance improvements, we added a FPS counter as part of our rendering logic. The next optimization was to realize that the operation of checking the forces that depend on a particle interaction with every other particle was n^2.
     However, the particles that mattered and applied the most important forces were close together. We needed to find a quick way to compute the neighbors of the particles in 3d space to find which particles for each particle affected it the most. 
     We considered using OctoTrees and KDTrees, but we ended up using nanoflann since it had a fast open source implementation of finding neighbors. Even with the overhead of creating a new KDTree each loop, we were seeing another 3-4x improvement in the performance. 
@@ -139,7 +139,7 @@ function App() {
     <Row><p>Simulation Params that we tweaked to make it more realistic water for our simulation is listed below.
     </p>
     </Row>
-    <Row><p>The following are some results that we recieved from our implementation. We ran at 4000 particles at 12-15fps.
+    <Row><p>The following are some results that we received from our implementation. We ran at 4000 particles at 12-15fps.
      This is very close to the particle count of 5000 mentioned in the paper with a stable fps</p>
      </Row>
     <Row>
@@ -185,7 +185,7 @@ function App() {
         <tr>
           <td>delta_t per simulation timestamp </td>
           <td>1/60</td>
-          <td>Paramater for how viscous the water seems</td>
+          <td>Paramter for how viscous the water seems</td>
         </tr>
         <tr>
           <td>Dampening</td>
