@@ -17,14 +17,24 @@ function App() {
 
   </Navbar>
   <Container>
-  <Row><Navbar.Brand>
+  <Row>
+    <Navbar.Brand>
       <h4>Vikranth Srivatsa, Bhuvan Basireddy, Kevin Lo, Benjamin Cheung</h4>
-    </Navbar.Brand></Row>
+    </Navbar.Brand>
+    </Row>
     <img src={logo} className="center" alt="logo for fluids"></img>
   </Container>
   <br />
   <Container>
-  
+    <Row><h2>Final Project Video</h2></Row>
+    <Row>
+      <ReactPlayer
+          width="50%"
+          controls={true}
+          url="https://www.youtube.com/watch?v=-6NWf9phIio"/>
+    </Row>
+    <br></br>
+    <br></br>
     <Row><h2>Abstract</h2></Row>
     <Row><p>Fluid simulations such as those with water, fire, smoke are very important in realtime games and visual effects.
       The many realistic water mods from games such as Skyrim and Minecraft provide a strong case study of their usability. Particle simulation among other approaches is popular method of simulating these effects.
@@ -222,6 +232,31 @@ function App() {
       controls={true}
       url="https://www.youtube.com/watch?v=Ve3xhCWj_q8"/>
     </Row>
+    <br></br>
+    <br></br>
+    <Row><h2>References</h2></Row>
+    <Row>
+      <ul>
+        <li>nano-gui: used to get mouse position and callbacks</li>
+        <li>Proj4 clothsim: helpful for setting up camera code + views and mouse callbacks</li>
+        <li>https://github.com/opengl-tutorials/ogl tutorials on how basic open gl works</li>
+        <li>Nanoflann - fast kd trees</li>
+        <li>Particle-Based Fluid Simulation for Interactive Applications: https://matthias-research.github.io/pages/publications/sca03.pdf - research paper physics based on </li>
+        <li>Rendering Spheres: https://www.songho.ca/opengl/gl_sphere.html</li>
+        <li>Rendering Spheres 2: https://github.com/Erkaman/cute-deferred-shading</li>
+        <li>Many other stack overflow references used to debug issues</li>
+      </ul>
+      </Row>
+      <Row><h2>Contributions</h2></Row>
+      <Row><p>We talked about and coded over vscode live share and zoom. We were all able to contribute equally through peer programming</p></Row>
+      <Row>
+        <ul>
+          <li>Vikranth: Responsible for core rendering logic and optimization</li>
+          <li>Bhuvan: Responsible for physics simulation logic</li>
+          <li>Kevin: Responsible for debugging logic, working on sending data to shaders, and paramater tuning</li>
+          <li>Benjamin: Responsible for debugging logic,bringing in proj4 logic, shaders, and paramater tuning</li>
+        </ul>
+      </Row>
 </Container>
   </div>
   );
