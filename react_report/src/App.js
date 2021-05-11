@@ -29,9 +29,10 @@ function App() {
     <Row><h2>Final Project Video</h2></Row>
     <Row>
       <ReactPlayer
+        className="center" 
           width="50%"
           controls={true}
-          url="https://www.youtube.com/watch?v=-6NWf9phIio"/>
+          url="https://www.youtube.com/watch?v=_-Tp0v-p-FM"/>
     </Row>
     <br></br>
     <br></br>
